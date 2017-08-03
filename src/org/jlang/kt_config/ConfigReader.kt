@@ -16,10 +16,7 @@
 
 package org.jlang.kt_config
 
-import org.jlang.kt_config.impl.ConfigMapBuilder
-import org.jlang.kt_config.impl.Lexer
-import org.jlang.kt_config.impl.StringReader
-import org.jlang.kt_config.impl.Token
+import org.jlang.kt_config.impl.*
 import org.jlang.kt_config.impl.TokenType.*
 import java.io.BufferedReader
 import java.io.InputStream
@@ -145,7 +142,9 @@ class ConfigReader(
                                 + "Expected a double quoted value.")
             }
 
-            mapBuilder.put(lookahead[0].data, applyDefinitionsToTokenData(lookahead[2]))
+            mapBuilder.put(
+                    lookahead[0].data,
+                    applyDefinitions(lookahead[2].data, lookahead[2].pos))
             consume(3)
 
             return true
@@ -176,12 +175,12 @@ class ConfigReader(
         }
     }
 
-    private fun applyDefinitionsToTokenData(token: Token): String {
-        var tmp: String = token.data
+    private fun applyDefinitions(text: String, tokenPos: Position): String {
+        var tmp: String = text
         definitions.forEach { k, v -> tmp = tmp.replace("${'$'}{$k}", v) }
         if (hasDefinitions(tmp)) {
             throw ConfigException(
-                    "Unresolved definition in value at position ${token.pos}.")
+                    "Unresolved definition in value at position ${tokenPos}.")
         }
         return tmp
     }
