@@ -46,7 +46,7 @@ import java.nio.charset.Charset
  */
 class ConfigReader(
         config: String,
-        private val userDefinitions: Map<String, String> = HashMap()
+        private val userDefinitions: Map<String,String> = HashMap()
 ) {
     // Actually a LL(2) parser is sufficient but LL(4) simplifies code
     val LOOKAHEAD_SIZE = 4
@@ -71,6 +71,10 @@ class ConfigReader(
                 it.readLines().reduce({ s1,s2 -> s1 + "\n" + s2 })
             }
         }
+    }
+
+    init {
+        validateUserDefinitions(userDefinitions)
     }
 
     fun read(): Config {
@@ -189,6 +193,18 @@ class ConfigReader(
     }
 
     private fun hasDefinitions(text: String): Boolean {
-        return text.matches(Regex(".*[$][{][a-zA-Z][a-zA-Z0-9_]*[}].*"))
+        return text.matches(Regex(".*[$][{][^}]+[}].*"))
+    }
+
+    private fun validateUserDefinitions(definitions: Map<String,String>): Unit {
+        fun isReservedKey(key: String) =
+                key.startsWith("env.", true) || key.startsWith("system.", true)
+
+        if (definitions.keys.filter { isReservedKey(it) }.any()) {
+            throw ConfigException(
+                    "User supplied definitions may not have keys starting "
+                            + "with 'env.' or 'system.' thus covering "
+                            + "environment variables or system properties.")
+        }
     }
 }
