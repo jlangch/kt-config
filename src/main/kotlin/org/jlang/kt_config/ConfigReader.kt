@@ -77,8 +77,11 @@ class ConfigReader(
         try {
             while (parseDefStatement()) { }
 
-            // apply the overriding user definitions
+            // add the overriding user definitions, environment variables,
+            // and system properties
             definitions.putAll(userDefinitions)
+            definitions.putAll(getPrefixedEnvironmentVariables())
+            definitions.putAll(getPrefixedSystemProperties())
 
             // a config is built from any number of config items and sections
             while (parseConfigItemOrSection()) { }
@@ -188,4 +191,15 @@ class ConfigReader(
     private fun hasDefinitions(text: String): Boolean {
         return text.matches(Regex(".*[$][{][a-zA-Z][a-zA-Z0-9_]*[}].*"))
     }
+
+    private fun getPrefixedEnvironmentVariables(): Map<String,String> =
+            System.getenv()
+                    .filterValues { v ->  v != null }
+                    .mapKeys { entry -> "env." + entry.key }
+
+    private fun getPrefixedSystemProperties(): Map<String,String> =
+            System.getProperties()
+                    .filterValues { v ->  v != null }
+                    .mapValues { entry -> entry.value.toString() }
+                    .mapKeys { entry -> "system." + entry.key }
 }

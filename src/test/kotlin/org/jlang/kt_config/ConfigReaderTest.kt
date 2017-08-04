@@ -396,11 +396,28 @@ class ConfigReaderTest {
                        |}
                      """.trimMargin()
 
+        println(System.getProperties())
         val cfg = ConfigReader(config, hashMapOf("home" to "/extra/org")).read()
         Assert.assertEquals(cfg.get("user"), "john.doe")
         Assert.assertEquals(cfg.get("section1.host"), "foo.org")
         Assert.assertEquals(cfg.get("section1.port"), "8000")
         Assert.assertEquals(cfg.get("section1.path"), "/extra/org/abc")
+    }
+
+    @Test
+    fun testComplexWithDefinition_System() {
+        val config = """section1 {
+                       |   host = "foo.org"
+                       |   port = "8000"
+                       |   path = "${'$'}{system.user.dir}/abc"
+                       |}
+                     """.trimMargin()
+
+        val userDir = System.getProperty("user.dir")
+        val cfg = ConfigReader(config).read()
+        Assert.assertEquals(cfg.get("section1.host"), "foo.org")
+        Assert.assertEquals(cfg.get("section1.port"), "8000")
+        Assert.assertEquals(cfg.get("section1.path"), userDir + "/abc")
     }
 
     @Test
