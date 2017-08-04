@@ -68,7 +68,7 @@ class ConfigReader(
 
         private fun slurp(inStream: InputStream, charset: Charset = Charsets.UTF_8): String {
             return BufferedReader(InputStreamReader(inStream, charset)).use {
-                it.readLines().reduce({ s1, s2 -> s1 + "\n" + s2 })
+                it.readLines().reduce({ s1,s2 -> s1 + "\n" + s2 })
             }
         }
     }
@@ -80,8 +80,8 @@ class ConfigReader(
             // add the overriding user definitions, environment variables,
             // and system properties
             definitions.putAll(userDefinitions)
-            definitions.putAll(getPrefixedEnvironmentVariables())
-            definitions.putAll(getPrefixedSystemProperties())
+            definitions.putAll(getPrefixedEnvironmentVariables("env"))
+            definitions.putAll(getPrefixedSystemProperties("system"))
 
             // a config is built from any number of config items and sections
             while (parseConfigItemOrSection()) { }
@@ -191,15 +191,4 @@ class ConfigReader(
     private fun hasDefinitions(text: String): Boolean {
         return text.matches(Regex(".*[$][{][a-zA-Z][a-zA-Z0-9_]*[}].*"))
     }
-
-    private fun getPrefixedEnvironmentVariables(): Map<String,String> =
-            System.getenv()
-                    .filterValues { v ->  v != null }
-                    .mapKeys { entry -> "env." + entry.key }
-
-    private fun getPrefixedSystemProperties(): Map<String,String> =
-            System.getProperties()
-                    .filterValues { v ->  v != null }
-                    .mapValues { entry -> entry.value.toString() }
-                    .mapKeys { entry -> "system." + entry.key }
 }

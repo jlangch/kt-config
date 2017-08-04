@@ -77,3 +77,15 @@ class StringReader(private val text: String) {
         }
     }
 }
+
+
+fun getPrefixedEnvironmentVariables(prefix: String): Map<String,String> =
+        System.getenv()
+                .filterValues { v ->  v != null }
+                .mapKeys { entry -> prefix + "." + entry.key }
+
+fun getPrefixedSystemProperties(prefix: String): Map<String,String> =
+        System.getProperties()
+                .filterValues { v ->  v != null }
+                .mapValues { entry -> entry.value.toString() }
+                .mapKeys { entry -> prefix + "." + entry.key }
