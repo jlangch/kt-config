@@ -20,12 +20,6 @@ test {
   host = "foo.org"
   port = "8000"
 }
-
-# UAT section
-uat {
-  host = "foo.org"
-  port = "8001"
-}
 ```
 
 ##### Dot notation
@@ -37,10 +31,6 @@ common.user = "john.doe"
 # Test section
 test.host = "foo.org"
 test.port = "8000"
-
-# UAT section
-uat.host = "foo.org"
-uat.port = "8001"
 ```
 
 ##### Mixed notation
@@ -53,57 +43,46 @@ common.user = "john.doe"
 test {
   host = "foo.org"
   port = "8000"
-}
 
-# UAT section
-uat {
-  host = "foo.org"
-  port = "8001"
-}
-```
-
-##### Nested sections
-
-```
-# Database section
-db {
-  # H2
-  h2 {
-    driver = "org.h2.Driver"
-    url = "jdbc:h2:tcp://localhost:9567/~data/db;MVCC=TRUE"
-  }
+  # Database section
+  db {
+    # H2
+    h2 {
+      driver = "org.h2.Driver"
+      url = "jdbc:h2:tcp://localhost:9567/~data/db;MVCC=TRUE"
+    }
   
-  #PostgreSQL
-  postgresql {
-    driver="org.postgresql.Driver"
-    url = "jdbc:postgresql://localhost:5432/serviceplanet"
+    #PostgreSQL
+    postgresql {
+      driver="org.postgresql.Driver"
+      url = "jdbc:postgresql://localhost:5432/serviceplanet"
+    }
   }
 }
 ```
 
-_this is equivalent to:_
-
-```
-# H2
-db.h2 {
-  driver = "org.h2.Driver"
-  url = "jdbc:h2:tcp://localhost:9567/~data/db;MVCC=TRUE"
-}
-
-#PostgreSQL
-db.postgresql.driver="org.postgresql.Driver"
-db.postgresql.url = "jdbc:postgresql://localhost:5432/serviceplanet"
-```
 
 ##### Using Definitions
 
 ```
 # Definitions favor DRY. Definitions can be refereneced as
 # ${name}.
+# All environment variables are available as implicit definitions
+# prefixed with 'env.' e.g. 'env.HOME'. 
+# Java system properties are available as implicit definitions
+# prefixed with 'system.' e.g 'system.io.temp' 
 
 # define the port
 def port = "8000"
 def database = "abc.db"
+
+
+app {
+  dir {
+    home = "${env.HOME}"         # uses Environment variable 'HOME'
+    temp = "${system.io.temp}"   # uses Java system property 'io.temp'
+  }
+}
 
 db {
   h2 {
@@ -142,7 +121,7 @@ val config: Properties = ConfigReader("....").read().toProperties()
 The configuration:
 ```
 def port = "8000"
-def database = "abc.db"
+def database = "sample.db"
 
 db {
   postgresql {
@@ -152,10 +131,42 @@ db {
 }
 ```
 
-Returns the two configuration values:
+Returns two configuration values:
 
 - db.postgresql.driver -> org.postgresql.Driver
-- db.postgresql.url -> jdbc:postgresql://localhost:8000/abc.db
+- db.postgresql.url -> jdbc:postgresql://localhost:8000/sample.db
+
+
+
+#### Selecting sub configurations
+
+```
+# Common section
+common.user = "john.doe"
+
+# Test section
+test {
+  host = "foo.org"
+  port = "8000"
+}
+
+# UAT section
+uat {
+  host = "foo.org"
+  port = "8001"
+}
+```
+
+
+```kotlin
+val config: Config = ConfigReader("....").read().getSubConfig("common", "test")
+```
+
+Returns three configuration values:
+
+- user -> john.doe
+- host -> foo.org
+- port -> 8001
 
 
 #### Passing user definitions
@@ -178,10 +189,6 @@ db {
 ```kotlin
 val config: Config = ConfigReader("....", hashMapOf("port" to "8080")).read()
 ```
-
-#### Selecting sub configurations
-
-
 
 ## Error handling
 
