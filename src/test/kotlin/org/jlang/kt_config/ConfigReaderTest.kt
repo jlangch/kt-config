@@ -110,6 +110,29 @@ class ConfigReaderTest {
     }
 
     @Test
+    fun testEscapedStrings() {
+        Assert.assertEquals(ConfigReader("""x = ' \' '""").read().get("x"), " ' ")
+        Assert.assertEquals(ConfigReader("""x = ' \" '""").read().get("x"), " \" ")
+        Assert.assertEquals(ConfigReader("""x = ' \n '""").read().get("x"), " \n ")
+        Assert.assertEquals(ConfigReader("""x = ' \t '""").read().get("x"), " \t ")
+
+        Assert.assertEquals(ConfigReader("""x = " \' """").read().get("x"), " ' ")
+        Assert.assertEquals(ConfigReader("""x = " \" """").read().get("x"), " \" ")
+        Assert.assertEquals(ConfigReader("""x = " \n """").read().get("x"), " \n ")
+        Assert.assertEquals(ConfigReader("""x = " \t """").read().get("x"), " \t ")
+    }
+
+    @Test(expectedExceptions = arrayOf(ConfigException::class))
+    fun testInvalidLineBreakInString_1() {
+        ConfigReader("x = ' \n '").read()
+    }
+
+    @Test(expectedExceptions = arrayOf(ConfigException::class))
+    fun testInvalidLineBreakInString_2() {
+        ConfigReader("x = \" \n \"").read()
+    }
+
+    @Test
     fun testSimpleConfig_2item() {
         val map1 = ConfigReader("host = 'foo.org' \n port = '8000'").read().toMap()
         Assert.assertEquals(map1.size, 2)

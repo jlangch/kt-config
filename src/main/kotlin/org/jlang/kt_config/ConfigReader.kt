@@ -161,14 +161,14 @@ class ConfigReader(
     }
 
     private fun parseSection(): Boolean {
-        if (lookahead[0].isType(IDENTIFIER, PATH) && lookahead[1].isType(LEFT_BRACKET)) {
+        if (lookahead[0].isType(IDENTIFIER, PATH) && lookahead[1].isType(LBRACE)) {
             mapBuilder.pushPath(lookahead[0].data)
             consume(2)
 
             // a section is built from any number of config items and sub sections
             while (parseConfigItemOrSection()) {}
 
-            if (lookahead[0].isNotType(RIGHT_BRACKET)) {
+            if (lookahead[0].isNotType(RBRACE)) {
                 throw ConfigException(
                         "Expected section close '{' at position ${lookahead[0].pos}.")
             }

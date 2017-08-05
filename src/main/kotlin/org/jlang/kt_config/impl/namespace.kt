@@ -18,7 +18,8 @@ package org.jlang.kt_config.impl
 
 
 enum class TokenType {
-    EOF, IDENTIFIER, PATH, EQUALS, LEFT_BRACKET, RIGHT_BRACKET, STRING, ANY
+    EOF, IDENTIFIER, PATH, STRING, ANY,
+    EQUALS, LBRACE, RBRACE, LBRACK, RBRACK, COMMA
 }
 
 
@@ -27,7 +28,14 @@ class Position(val row: Int = 1, val col: Int = 1) {
 }
 
 
-class Token(val data: String = "", val type: TokenType, val pos: Position) {
+class Token(val type: TokenType, val data: String, val pos: Position) {
+    constructor(type: TokenType, ch: Character)
+            : this(type, ch.char.toString(), ch.pos)
+
+    companion object {
+        fun eof(pos: Position): Token = Token(TokenType.EOF, "", pos)
+    }
+
     fun isType(vararg types: TokenType): Boolean = types.any { it == type }
 
     fun isNotType(vararg types: TokenType): Boolean = types.all { it != type }
@@ -36,8 +44,10 @@ class Token(val data: String = "", val type: TokenType, val pos: Position) {
 }
 
 
-class Character(val char: Char?, val pos: Position) {
+data class Character(val char: Char?, val pos: Position) {
     fun eof() = char == null
+
+    fun isEscapeChar(): Boolean = char == '\\'
 
     fun isChar(vararg ch: Char): Boolean = ch.any { it == char }
 
