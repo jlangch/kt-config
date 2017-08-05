@@ -17,6 +17,7 @@
 package org.jlang.kt_config
 
 import java.util.Properties
+import org.jlang.kt_config.impl.*
 
 
 /**
@@ -49,16 +50,16 @@ import java.util.Properties
  * `    uat.host = "foo.org"`
  * `    uat.port = "9000"`
  */
-class Config(val map: MutableMap<String,String> = LinkedHashMap()) {
+class ConfigObject(val map: MutableMap<String,String> = LinkedHashMap()) {
 
     fun toMap(): Map<String,String> = LinkedHashMap(map)
 
     fun toProperties(): Properties = Properties().apply { map.forEach { k,v -> setProperty(k,v) } }
 
-    fun getSubConfig(vararg sections: String): Config {
-        if (sections.isEmpty()) return Config()
+    fun getSubConfig(vararg sections: String): ConfigObject {
+        if (sections.isEmpty()) return ConfigObject()
 
-        return Config().also { subConfig ->
+        return ConfigObject().also { subConfig ->
             sections.forEach { path ->
                 val subPath = trimPath(path) + '.'
                 map.filter{ entry -> entry.key.startsWith(subPath) }
@@ -67,11 +68,49 @@ class Config(val map: MutableMap<String,String> = LinkedHashMap()) {
         }
     }
 
-    fun get(key: String): String? = map[key]
+    fun isEmpty(): Boolean = map.isEmpty()
 
-    fun getOrDefault(key: String, defaultValue: String?): String? = map.getOrDefault(key, defaultValue)
+    fun hasPath(path: String): Boolean = hasValuePath(path) || hasListPath(path)
 
-    private fun put(key: String, value: String): Unit { map.put(key, value) }
+    fun get(path: String): String {
+        if (hasValuePath(path)) {
+            return map[path]!!
+        }
+        else {
+            if (hasListPath(path)) {
+                throw ConfigException(
+                        "The configuration value $path does not exist." +
+                                "But there is a list value at the requested path")
+            }
+            else {
+                throw ConfigException(
+                        "The configuration value $path does not exist")
+            }
+        }
+    }
+
+    fun getList(path: String): List<String> {
+        if (hasValuePath(path)) {
+            return listOf<String>(map[path]!!)
+        }
+        else if (hasListPath(path)) {
+            val size = map[composePath(path, "size")]!!.toInt()
+
+            return ArrayList<String>().apply {
+                for(ii in 1..size) { add(map[composePath(path, ii)]!!) }
+            }
+        }
+        else {
+            throw ConfigException(
+                    "The configuration value $path does not exist")
+        }
+    }
+
+    private fun hasValuePath(path: String): Boolean = map.containsKey(path)
+
+    private fun hasListPath(path: String): Boolean = map.containsKey(composePath(path, "size"))
+
+    private fun put(path: String, value: String): Unit { map.put(path, value) }
 
     private fun trimPath(path: String) = path.trimEnd { it == '.' }
 }

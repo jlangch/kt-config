@@ -22,3 +22,4 @@ class ConfigException : RuntimeException {
     constructor(message: String): super(message)
     //constructor(ex: Exception): super(ex)
 }
+

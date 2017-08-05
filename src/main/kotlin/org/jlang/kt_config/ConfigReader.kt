@@ -38,9 +38,10 @@ import java.nio.charset.Charset
  *    Config ::= DefStatement { Section | ConfigItem }
  *    DefStatement ::= 'def' Identifier '=' Value
  *    Section ::= (Identifier | Path) '{' { (Section | ConfigItem) } '}'
- *    ConfigItem ::= (Identifier | Path) '=' Value
+ *    ConfigItem ::= (Identifier | Path) '=' (Value | MultiValue)
  *    Identifier ::= (a..z | A..Z)  { (a..z | A..Z| 0..9 | '_') }
  *    Path ::= Identifier { '.' Identifier }
+ *    MultiValue ::= '[' Value { ',' Value } ']'
  *    Value ::= ('"' <any-char> '"' | ''' <any-char> '''
  * ``
  */
@@ -77,7 +78,7 @@ class ConfigReader(
         validateUserDefinitions(userDefinitions)
     }
 
-    fun read(): Config {
+    fun read(): ConfigObject {
         try {
             while (parseDefStatement()) { }
 
@@ -94,7 +95,7 @@ class ConfigReader(
                 throw ConfigException("Expected EOF at position ${lookahead[0].pos}.")
             }
 
-            return Config(LinkedHashMap(mapBuilder.get()))
+            return ConfigObject(LinkedHashMap(mapBuilder.get()))
         } catch(ex: ConfigException) {
             throw ex
         } catch(ex: Exception) {
@@ -143,21 +144,64 @@ class ConfigReader(
 
     private fun parseConfigItem(): Boolean {
         if (lookahead[0].isType(IDENTIFIER, PATH) && lookahead[1].isType(EQUALS)) {
-            if (lookahead[2].isNotType(STRING)) {
+            if (lookahead[2].isType(STRING)) {
+                // single value: name = "value"
+                mapBuilder.put(
+                        lookahead[0].data,
+                        applyDefinitions(lookahead[2].data, lookahead[2].pos))
+
+                consume(3)
+            }
+            else if (lookahead[2].isType(LBRACK)) {
+                // multi value: name = [ "value1", "value2", ... ]
+                val name = lookahead[0].data
+                val pos = lookahead[2].pos
+
+                consume(3)
+
+                parseConfigItem_MultiValues(name, pos)
+
+                if (lookahead[0].isNotType(RBRACK)) {
+                    throw ConfigException(
+                            "Expected array close ']' at position ${lookahead[0].pos}.")
+                }
+
+                consume(1)
+            }
+            else {
                 throw ConfigException(
                         "Invalid config item at position ${lookahead[2].pos}. "
                                 + "Expected a double quoted value.")
             }
 
-            mapBuilder.put(
-                    lookahead[0].data,
-                    applyDefinitions(lookahead[2].data, lookahead[2].pos))
-            consume(3)
-
             return true
         } else {
             return false
         }
+    }
+
+    private fun parseConfigItem_MultiValues(name: String, pos: Position): Unit {
+        var valueIndex = 1
+
+        if (lookahead[0].isType(STRING)) {
+            mapBuilder.put(
+                    name,
+                    valueIndex++,
+                    applyDefinitions(lookahead[0].data, lookahead[0].pos))
+
+            consume(1)
+
+            while (lookahead[0].isType(COMMA) && lookahead[1].isType(STRING)) {
+                mapBuilder.put(
+                        name,
+                        valueIndex++,
+                        applyDefinitions(lookahead[1].data, lookahead[1].pos))
+
+                consume(2)
+            }
+        }
+
+        mapBuilder.put(composePath(name, "size"), (valueIndex-1).toString())
     }
 
     private fun parseSection(): Boolean {

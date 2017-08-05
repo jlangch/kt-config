@@ -18,8 +18,17 @@ package org.jlang.kt_config.impl
 
 
 enum class TokenType {
-    EOF, IDENTIFIER, PATH, STRING, ANY,
-    EQUALS, LBRACE, RBRACE, LBRACK, RBRACK, COMMA
+    EOF,        // end-of-file
+    IDENTIFIER, // abc
+    PATH,       // abc.def.ghi
+    STRING,     // "..." or '...'
+    ANY,        // anything
+    EQUALS,     // '='
+    LBRACE,     // '{'
+    RBRACE,     // '}'
+    LBRACK,     // '['
+    RBRACK,     // ']'
+    COMMA       // ','
 }
 
 
@@ -88,6 +97,17 @@ class StringReader(private val text: String) {
     }
 }
 
+fun composePath(base: String, key: String, index: Int): String {
+    return composePath(base, composePath(key, index))
+}
+
+fun composePath(key: String, index: Int): String {
+    return composePath(key, index.toString())
+}
+
+fun composePath(base: String, path: String): String {
+    return if (base.isEmpty()) path else base + "." + path
+}
 
 fun getPrefixedEnvironmentVariables(prefix: String): Map<String,String> =
         System.getenv()

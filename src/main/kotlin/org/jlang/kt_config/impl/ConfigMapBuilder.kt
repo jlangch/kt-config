@@ -22,22 +22,22 @@ import java.util.Deque
 
 class ConfigMapBuilder {
     private val config: MutableMap<String,String> = LinkedHashMap()
-    private var stack: Deque<String> = ArrayDeque()
+    private var pathStack: Deque<String> = ArrayDeque()
 
 
-    fun pushPath(path: String): Unit = stack.push(path)
+    fun pushPath(path: String): Unit = pathStack.push(path)
 
-    fun popPath(): String = stack.pop()
+    fun popPath(): String = pathStack.pop()
 
     fun put(key: String, value: String): Unit {
-        config[concatPath(currPath(), key)] = value
+        config[composePath(currPath(), key)] = value
+    }
+
+    fun put(key: String, index: Int, value: String): Unit {
+        config[composePath(currPath(), key, index)] = value
     }
 
     fun get(): Map<String,String>  = config
 
-    private fun currPath(): String = stack.reversed().joinToString(".")
-
-    private fun concatPath(base: String, path: String): String {
-        return if (base.isEmpty()) path else base + "." + path
-    }
+    private fun currPath(): String = pathStack.reversed().joinToString(".")
 }

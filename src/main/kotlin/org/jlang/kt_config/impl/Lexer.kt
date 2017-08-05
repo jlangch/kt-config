@@ -71,7 +71,8 @@ class Lexer(private val reader: StringReader) {
         }
 
         if (lookahead.eof()) {
-            throw ConfigException("Unexpected EOF within a string at position $startPos")
+            throw ConfigException(
+                    "Unexpected EOF within a string at position $startPos")
         }
 
         consume() // trailing quote
