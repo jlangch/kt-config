@@ -19,6 +19,7 @@ package org.jlang.kt_config
 import org.jlang.kt_config.Config
 import org.jlang.kt_config.impl.*
 import org.jlang.kt_config.impl.TokenType.*
+import java.io.Reader
 import java.io.BufferedReader
 import java.io.InputStream
 import java.io.InputStreamReader
@@ -68,10 +69,40 @@ class ConfigReader(
                 userDefinitions: Map<String, String> = HashMap()
         ): ConfigReader = ConfigReader(slurp(inStream, charset), userDefinitions)
 
+        fun create(
+                reader: Reader,
+                userDefinitions: Map<String, String> = HashMap()
+        ): ConfigReader = ConfigReader(slurp(reader), userDefinitions)
+
+        fun create(
+                classPathResource: String,
+                userDefinitions: Map<String, String> = HashMap()
+        ): ConfigReader = ConfigReader(slurp(classPathResource), userDefinitions)
+
+        fun create(
+                classPathResource: String,
+                loader: ClassLoader,
+                userDefinitions: Map<String, String> = HashMap()
+        ): ConfigReader = ConfigReader(slurp(classPathResource), userDefinitions)
+
         private fun slurp(inStream: InputStream, charset: Charset = Charsets.UTF_8): String {
             return BufferedReader(InputStreamReader(inStream, charset)).use {
                 it.readLines().reduce({ s1,s2 -> s1 + "\n" + s2 })
             }
+        }
+
+        private fun slurp(reader: Reader): String {
+            return BufferedReader(reader).use {
+                it.readLines().reduce({ s1,s2 -> s1 + "\n" + s2 })
+            }
+        }
+
+        private fun slurp(classPathResource: String): String {
+            return slurp(this.javaClass.getResourceAsStream(classPathResource))
+        }
+
+        private fun slurp(classPathResource: String, loader: ClassLoader): String {
+            return slurp(loader.getResourceAsStream(classPathResource))
         }
     }
 
