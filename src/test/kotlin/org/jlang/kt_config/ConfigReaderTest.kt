@@ -131,24 +131,6 @@ class ConfigReaderTest {
     }
 
     @Test
-    fun testSimpleConfig_MultiValue() {
-        Assert.assertTrue(
-                ConfigReader("x = [ ]").read().getList("x").isEmpty())
-
-        Assert.assertEquals(
-                ConfigReader("x = [ '100' ]").read().getList("x"),
-                listOf("100"))
-
-        Assert.assertEquals(
-                ConfigReader("x = [ '100', '200' ]").read().getList("x"),
-                listOf("100", "200"))
-
-        Assert.assertEquals(
-                ConfigReader("x = [ '100', '200', '300' ]").read().getList("x"),
-                listOf("100", "200", "300"))
-    }
-
-    @Test
     fun testSimpleConfig_2item() {
         val map1 = ConfigReader("host = 'foo.org' \n port = '8000'").read().toMap()
         Assert.assertEquals(map1.size, 2)
