@@ -16,7 +16,6 @@
 
 package org.jlang.kt_config
 
-import org.jlang.kt_config.Config
 import org.jlang.kt_config.impl.*
 import org.jlang.kt_config.impl.TokenType.*
 import java.io.Reader
@@ -77,13 +76,15 @@ class ConfigReader(
         fun create(
                 classPathResource: String,
                 userDefinitions: Map<String, String> = HashMap()
-        ): ConfigReader = ConfigReader(slurp(classPathResource), userDefinitions)
+        ): ConfigReader = ConfigReader(
+                                slurp(classPathResource, this.javaClass.classLoader),
+                                userDefinitions)
 
         fun create(
                 classPathResource: String,
                 loader: ClassLoader,
                 userDefinitions: Map<String, String> = HashMap()
-        ): ConfigReader = ConfigReader(slurp(classPathResource), userDefinitions)
+        ): ConfigReader = ConfigReader(slurp(classPathResource, loader), userDefinitions)
 
         private fun slurp(inStream: InputStream, charset: Charset = Charsets.UTF_8): String {
             return BufferedReader(InputStreamReader(inStream, charset)).use {
@@ -95,10 +96,6 @@ class ConfigReader(
             return BufferedReader(reader).use {
                 it.readLines().reduce({ s1,s2 -> s1 + "\n" + s2 })
             }
-        }
-
-        private fun slurp(classPathResource: String): String {
-            return slurp(this.javaClass.getResourceAsStream(classPathResource))
         }
 
         private fun slurp(classPathResource: String, loader: ClassLoader): String {
@@ -187,11 +184,10 @@ class ConfigReader(
             else if (lookahead[2].isType(LBRACK)) {
                 // multi value: name = [ "value1", "value2", ... ]
                 val name = lookahead[0].data
-                val pos = lookahead[2].pos
 
                 consume(3)
 
-                parseConfigItem_MultiValues(name, pos)
+                parseConfigItem_MultiValues(name)
 
                 if (lookahead[0].isNotType(RBRACK)) {
                     throw ConfigException(
@@ -212,7 +208,7 @@ class ConfigReader(
         }
     }
 
-    private fun parseConfigItem_MultiValues(name: String, pos: Position): Unit {
+    private fun parseConfigItem_MultiValues(name: String): Unit {
         var valueIndex = 1
 
         if (lookahead[0].isType(STRING)) {
@@ -262,7 +258,7 @@ class ConfigReader(
         val tmp = applyDefinitions(text, definitions)
         if (hasDefinitions(tmp)) {
             throw ConfigException(
-                    "Unresolved definition in value at position ${tokenPos}.")
+                    "Unresolved definition in value at position $tokenPos.")
         }
         return tmp
     }

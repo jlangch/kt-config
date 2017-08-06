@@ -17,20 +17,22 @@
 package org.jlang.kt_config.impl
 
 import org.jlang.kt_config.ConfigException
+import org.jlang.kt_config.impl.TokenType.*
 
 
 class Lexer(private val reader: StringReader) {
+    private val WHITESPACES = setOf(' ', '\n', '\r', '\t')
     private var lookahead: Character = reader.readNext()
 
     fun nextToken(): Token {
         while (!lookahead.eof()) {
             when {
-                lookahead.isChar('{') -> return Token(TokenType.LBRACE, lookahead).also { consume() }
-                lookahead.isChar('}') -> return Token(TokenType.RBRACE, lookahead).also { consume() }
-                lookahead.isChar('[') -> return Token(TokenType.LBRACK, lookahead).also { consume() }
-                lookahead.isChar(']') -> return Token(TokenType.RBRACK, lookahead).also { consume() }
-                lookahead.isChar('=') -> return Token(TokenType.EQUALS, lookahead).also { consume() }
-                lookahead.isChar(',') -> return Token(TokenType.COMMA, lookahead).also { consume() }
+                lookahead.isChar('{') -> return Token(LBRACE, lookahead).also { consume() }
+                lookahead.isChar('}') -> return Token(RBRACE, lookahead).also { consume() }
+                lookahead.isChar('[') -> return Token(LBRACK, lookahead).also { consume() }
+                lookahead.isChar(']') -> return Token(RBRACK, lookahead).also { consume() }
+                lookahead.isChar('=') -> return Token(EQUALS, lookahead).also { consume() }
+                lookahead.isChar(',') -> return Token(COMMA, lookahead).also { consume() }
                 lookahead.isChar('"') -> return readStringToken('"')
                 lookahead.isChar('\'') -> return readStringToken('\'')
                 isCommentChar(lookahead.char) -> consumeCommentToEOL()
@@ -92,7 +94,7 @@ class Lexer(private val reader: StringReader) {
             '"'  -> return '"'
             else -> throw ConfigException(
                     "Invalid escaped character '\\${lookahead.char}' a "
-                            + "position ${pos}. Supported escape characters are: "
+                            + "position $pos. Supported escape characters are: "
                             + "\\n, \\r, \\t, \\', \\\"")
 
         }
@@ -104,8 +106,7 @@ class Lexer(private val reader: StringReader) {
         val idToken: Token = readIdentifier()
 
         if (isDotChar(lookahead.char)) {
-            sb.append(idToken.data)
-            sb.append('.')
+            sb.append(idToken.data).append('.')
             consume()
             while(isIdentifierStartChar(lookahead.char)) {
                 val idToken: Token = readIdentifier()
@@ -120,9 +121,9 @@ class Lexer(private val reader: StringReader) {
             }
             if (sb.endsWith('.')) {
                 throw ConfigException(
-                        "Invalid path at position ${startPos}. Paths must not end with a '.'")
+                        "Invalid path at position $startPos. Paths must not end with a '.'")
             }
-            return Token(TokenType.PATH, sb.toString(), startPos)
+            return Token(PATH, sb.toString(), startPos)
         }
         else {
             return idToken
@@ -141,7 +142,7 @@ class Lexer(private val reader: StringReader) {
             consume()
         }
 
-        return Token(TokenType.IDENTIFIER, sb.toString(), startPos)
+        return Token(IDENTIFIER, sb.toString(), startPos)
     }
 
     private fun readAnyTokenToEOL(): Token {
@@ -156,37 +157,20 @@ class Lexer(private val reader: StringReader) {
             consume()
         }
 
-        return Token(TokenType.ANY, sb.toString(), startPos)
+        return Token(ANY, sb.toString(), startPos)
     }
 
     private fun isDotChar(ch: Char?): Boolean = (ch == '.')
 
     private fun isCommentChar(ch: Char?): Boolean = (ch == '#')
 
-    private fun isWhitespaceChar(ch: Char?): Boolean {
-        return when (ch) {
-            ' ', '\n', '\r', '\t' -> true
-            else -> false
-        }
-    }
+    private fun isWhitespaceChar(ch: Char?): Boolean = WHITESPACES.contains(ch)
 
-    private fun isIdentifierStartChar(ch: Char?): Boolean {
-        return when (ch) {
-            in 'a'..'z' -> true
-            in 'A'..'Z' -> true
-            else -> false
-        }
-    }
+    private fun isIdentifierStartChar(ch: Char?): Boolean =
+        ch in 'a'..'z' || ch in 'A'..'Z'
 
-    private fun isIdentifierChar(ch: Char?): Boolean {
-        return when (ch) {
-            in 'a'..'z' -> true
-            in 'A'..'Z' -> true
-            in '0'..'9' -> true
-            '_' -> true
-            else -> false
-        }
-    }
+    private fun isIdentifierChar(ch: Char?): Boolean =
+        isIdentifierStartChar(ch) || ch in '0'..'9' || ch == '_'
 
     private fun isAnyChar(ch: Char?): Boolean = !isWhitespaceChar(ch)
 }

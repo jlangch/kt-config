@@ -18,7 +18,6 @@ package org.jlang.kt_config.impl
 
 import org.jlang.kt_config.Config
 import org.jlang.kt_config.ConfigException
-import org.jlang.kt_config.impl.ConfigObject
 import java.util.*
 
 
@@ -72,7 +71,7 @@ class ConfigImpl(private val cfgObj: ConfigObject) : Config {
             trueValues.contains(lowerCaseValue) -> true
             falseValues.contains(lowerCaseValue) -> false
             else -> throw ConfigException(
-                    "Invalid boolean property ${value}. Use one of (true|false)," +
+                    "Invalid boolean property $value. Use one of (true|false)," +
                             "(yes|no), (on|off), (enabled|disabled), (active|inactive)")
         }
     }

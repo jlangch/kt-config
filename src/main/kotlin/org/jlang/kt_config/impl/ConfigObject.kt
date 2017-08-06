@@ -25,7 +25,6 @@ import kotlin.collections.Map
 import kotlin.collections.MutableMap
 import kotlin.collections.filter
 import kotlin.collections.forEach
-import kotlin.collections.isEmpty
 import kotlin.collections.listOf
 
 /*
@@ -50,8 +49,6 @@ class ConfigObject(val map: MutableMap<String,String> = LinkedHashMap()) {
     fun toMap(): Map<String,String> = LinkedHashMap(map)
 
     fun toProperties(): Properties = Properties().apply { map.forEach { k,v -> setProperty(k,v) } }
-
-    fun getSubConfig(section: String): ConfigObject = getSubConfig(listOf(section))
 
     fun getSubConfig(sections: List<String>): ConfigObject {
         if (sections.isEmpty()) return ConfigObject()
@@ -88,7 +85,7 @@ class ConfigObject(val map: MutableMap<String,String> = LinkedHashMap()) {
 
     fun getList(path: String): List<String> {
         if (hasValuePath(path)) {
-            return listOf<String>(map[path]!!)
+            return listOf(map[path]!!)
         }
         else if (hasListPath(path)) {
             val size = map[composePath(path, "size")]!!.toInt()
