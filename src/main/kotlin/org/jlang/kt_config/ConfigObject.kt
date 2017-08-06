@@ -16,8 +16,17 @@
 
 package org.jlang.kt_config
 
+import org.jlang.kt_config.impl.composePath
 import java.util.Properties
-import org.jlang.kt_config.impl.*
+import kotlin.collections.ArrayList
+import kotlin.collections.LinkedHashMap
+import kotlin.collections.List
+import kotlin.collections.Map
+import kotlin.collections.MutableMap
+import kotlin.collections.filter
+import kotlin.collections.forEach
+import kotlin.collections.isEmpty
+import kotlin.collections.listOf
 
 
 /**
@@ -56,7 +65,9 @@ class ConfigObject(val map: MutableMap<String,String> = LinkedHashMap()) {
 
     fun toProperties(): Properties = Properties().apply { map.forEach { k,v -> setProperty(k,v) } }
 
-    fun getSubConfig(vararg sections: String): ConfigObject {
+    fun getSubConfig(section: String): ConfigObject = getSubConfig(listOf(section))
+
+    fun getSubConfig(sections: List<String>): ConfigObject {
         if (sections.isEmpty()) return ConfigObject()
 
         return ConfigObject().also { subConfig ->

@@ -54,7 +54,7 @@ class ConfigReader(
 
     val lexer: Lexer = Lexer(StringReader(config.trim()))
     val mapBuilder: ConfigMapBuilder = ConfigMapBuilder()
-    val definitions: MutableMap<String, String> = LinkedHashMap()
+    val definitions: MutableMap<String,String> = LinkedHashMap()
 
     // prime lookahead buffer with tokens
     var lookahead: MutableList<Token> =
@@ -80,13 +80,11 @@ class ConfigReader(
 
     fun read(): ConfigObject {
         try {
-            while (parseDefStatement()) { }
-
-            // add the overriding user definitions, environment variables,
-            // and system properties
-            definitions.putAll(userDefinitions)
             definitions.putAll(getPrefixedEnvironmentVariables("env"))
             definitions.putAll(getPrefixedSystemProperties("system"))
+            definitions.putAll(userDefinitions)
+
+            while (parseDefStatement()) { }
 
             // a config is built from any number of config items and sections
             while (parseConfigItemOrSection()) { }
@@ -131,7 +129,9 @@ class ConfigReader(
                                 + "Expected a variable value string.")
             }
 
-            definitions.put(lookahead[1].data, lookahead[3].data)
+            definitions.put(
+                    lookahead[1].data,
+                    applyDefinitions(lookahead[3].data, lookahead[3].pos))
             consume(4)
 
             return true
@@ -227,12 +227,17 @@ class ConfigReader(
     }
 
     private fun applyDefinitions(text: String, tokenPos: Position): String {
-        var tmp: String = text
-        definitions.forEach { k, v -> tmp = tmp.replace("${'$'}{$k}", v) }
+        val tmp = applyDefinitions(text, definitions)
         if (hasDefinitions(tmp)) {
             throw ConfigException(
                     "Unresolved definition in value at position ${tokenPos}.")
         }
+        return tmp
+    }
+
+    private fun applyDefinitions(text: String, defs: Map<String,String>): String {
+        var tmp: String = text
+        defs.forEach { k, v -> tmp = tmp.replace("${'$'}{$k}", v) }
         return tmp
     }
 

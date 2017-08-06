@@ -16,8 +16,6 @@
 
 package org.jlang.kt_config
 
-import org.jlang.kt_config.ConfigException
-import org.jlang.kt_config.ConfigReader
 import org.testng.Assert
 import org.testng.annotations.Test
 
@@ -331,7 +329,7 @@ class ConfigReaderTest {
         val map = ConfigReader(config).read().toMap()
         Assert.assertEquals(map.size, 4)
 
-        val map2 = ConfigReader(config).read().getSubConfig("section1", "section2").toMap()
+        val map2 = ConfigReader(config).read().getSubConfig(listOf("section1", "section2")).toMap()
         Assert.assertEquals(map2.size, 4)
         Assert.assertEquals(map2.get("user"), "john.doe")
         Assert.assertEquals(map2.get("host"), "foo.org")
@@ -353,9 +351,6 @@ class ConfigReaderTest {
 
         val map6 = ConfigReader(config).read().getSubConfig("").toMap()
         Assert.assertEquals(map6.size, 0)
-
-        val map7 = ConfigReader(config).read().getSubConfig().toMap()
-        Assert.assertEquals(map7.size, 0)
     }
 
     @Test
@@ -373,11 +368,11 @@ class ConfigReaderTest {
         val map = ConfigReader(config).read().toMap()
         Assert.assertEquals(map.size, 2)
 
-        val map2 = ConfigReader(config).read().getSubConfig("section1", "section2").toMap()
+        val map2 = ConfigReader(config).read().getSubConfig(listOf("section1", "section2")).toMap()
         Assert.assertEquals(map2.size, 1)
         Assert.assertEquals(map2.get("port"), "2000")
 
-        val map3 = ConfigReader(config).read().getSubConfig("section2", "section1").toMap()
+        val map3 = ConfigReader(config).read().getSubConfig(listOf("section2", "section1")).toMap()
         Assert.assertEquals(map3.size, 1)
         Assert.assertEquals(map3.get("port"), "1000")
     }
@@ -423,9 +418,7 @@ class ConfigReaderTest {
 
     @Test
     fun testComplexWithDefinition_User() {
-        val config = """def home = "/foo/org"
-                       |
-                       |user = "john.doe"
+        val config = """user = "john.doe"
                        |section1 {
                        |   host = "foo.org"
                        |   port = "8000"
@@ -462,6 +455,7 @@ class ConfigReaderTest {
         val config = """# adahdhk ##
                        |def home = "/foo/org"        # adahdhk
                        |
+                       |#
                        |# adahdhk
                        | # adahdhk
                        |user = "john.doe"            # adahdhk
@@ -472,11 +466,11 @@ class ConfigReaderTest {
                        |}
                      """.trimMargin()
 
-        val cfg = ConfigReader(config, hashMapOf("home" to "/extra/org")).read()
+        val cfg = ConfigReader(config).read()
         Assert.assertEquals(cfg.get("user"), "john.doe")
         Assert.assertEquals(cfg.get("section1.host"), "foo.org")
         Assert.assertEquals(cfg.get("section1.port"), "8000")
-        Assert.assertEquals(cfg.get("section1.path"), "/extra/org/abc")
+        Assert.assertEquals(cfg.get("section1.path"), "/foo/org/abc")
     }
 
     @Test
