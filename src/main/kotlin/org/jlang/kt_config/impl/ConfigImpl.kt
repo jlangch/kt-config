@@ -23,6 +23,8 @@ import java.util.*
 
 
 class ConfigImpl(private val cfgObj: ConfigObject) : Config {
+    val trueValues = setOf("true", "yes", "on", "enabled", "active")
+    val falseValues = setOf("false", "no", "off", "disabled", "inactive")
 
     override fun isEmpty(): Boolean = cfgObj.isEmpty()
 
@@ -34,32 +36,27 @@ class ConfigImpl(private val cfgObj: ConfigObject) : Config {
 
     override fun getString(path: String): String = cfgObj.get(path)
 
-    override fun getBoolean(path: String): Boolean {
-        val value = cfgObj.get(path)
-        return when {
-            value.equals("true", true) -> true
-            value.equals("false", true) -> false
-            value.equals("yes", true) -> true
-            value.equals("no", true) -> false
-            value.equals("on", true) -> true
-            value.equals("off", true) -> false
-            value.equals("enabled", true) -> true
-            value.equals("disabled", true) -> false
-            value.equals("active", true) -> true
-            value.equals("inactive", true) -> false
-            else -> throw ConfigException(
-                    "Invalid boolean property ${value}. Use one of (true|false)," +
-                            "(yes|no), (on|off), (enabled|disabled), (active|inactive)")
-        }
-    }
+    override fun getStringList(path: String): List<String> = getList(path)
+
+    override fun getBoolean(path: String): Boolean = toBoolean(cfgObj.get(path))
+
+    override fun getBooleanList(path: String): List<Boolean> = getList(path).map { toBoolean(it) }
 
     override fun getInt(path: String): Int = getString(path).toInt()
 
+    override fun getIntList(path: String): List<Int> = getList(path).map { it.toInt() }
+
     override fun getLong(path: String): Long = getString(path).toLong()
+
+    override fun getLongList(path: String): List<Long> = getList(path).map { it.toLong() }
 
     override fun getFloat(path: String): Float = getString(path).toFloat()
 
+    override fun getFloatList(path: String): List<Float> = getList(path).map { it.toFloat() }
+
     override fun getDouble(path: String): Double = getString(path).toDouble()
+
+    override fun getDoubleList(path: String): List<Double> = getList(path).map { it.toDouble() }
 
     override fun toMap(): Map<String,String> = cfgObj.toMap()
 
@@ -67,5 +64,17 @@ class ConfigImpl(private val cfgObj: ConfigObject) : Config {
 
     override fun getSubConfig(vararg sections: String): Config =
             ConfigImpl(cfgObj.getSubConfig(sections.toList()))
+
+
+    private fun toBoolean(value: String): Boolean {
+        val lowerCaseValue = value.toLowerCase()
+        return when {
+            trueValues.contains(lowerCaseValue) -> true
+            falseValues.contains(lowerCaseValue) -> false
+            else -> throw ConfigException(
+                    "Invalid boolean property ${value}. Use one of (true|false)," +
+                            "(yes|no), (on|off), (enabled|disabled), (active|inactive)")
+        }
+    }
 
 }

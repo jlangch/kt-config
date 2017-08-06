@@ -61,15 +61,27 @@ interface Config {
 
     fun getString(path: String): String
 
+    fun getStringList(path: String): List<String>
+
     fun getBoolean(path: String): Boolean
+
+    fun getBooleanList(path: String): List<Boolean>
 
     fun getInt(path: String): Int
 
+    fun getIntList(path: String): List<Int>
+
     fun getLong(path: String): Long
+
+    fun getLongList(path: String): List<Long>
 
     fun getFloat(path: String): Float
 
+    fun getFloatList(path: String): List<Float>
+
     fun getDouble(path: String): Double
+
+    fun getDoubleList(path: String): List<Double>
 
     fun toMap(): Map<String,String>
 
