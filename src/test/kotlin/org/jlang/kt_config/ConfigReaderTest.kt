@@ -329,7 +329,7 @@ class ConfigReaderTest {
         val map = ConfigReader(config).read().toMap()
         Assert.assertEquals(map.size, 4)
 
-        val map2 = ConfigReader(config).read().getSubConfig(listOf("section1", "section2")).toMap()
+        val map2 = ConfigReader(config).read().getSubConfig("section1", "section2").toMap()
         Assert.assertEquals(map2.size, 4)
         Assert.assertEquals(map2.get("user"), "john.doe")
         Assert.assertEquals(map2.get("host"), "foo.org")
@@ -368,11 +368,11 @@ class ConfigReaderTest {
         val map = ConfigReader(config).read().toMap()
         Assert.assertEquals(map.size, 2)
 
-        val map2 = ConfigReader(config).read().getSubConfig(listOf("section1", "section2")).toMap()
+        val map2 = ConfigReader(config).read().getSubConfig("section1", "section2").toMap()
         Assert.assertEquals(map2.size, 1)
         Assert.assertEquals(map2.get("port"), "2000")
 
-        val map3 = ConfigReader(config).read().getSubConfig(listOf("section2", "section1")).toMap()
+        val map3 = ConfigReader(config).read().getSubConfig("section2", "section1").toMap()
         Assert.assertEquals(map3.size, 1)
         Assert.assertEquals(map3.get("port"), "1000")
     }

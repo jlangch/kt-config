@@ -16,6 +16,7 @@
 
 package org.jlang.kt_config
 
+import org.jlang.kt_config.Config
 import org.jlang.kt_config.impl.*
 import org.jlang.kt_config.impl.TokenType.*
 import java.io.BufferedReader
@@ -78,7 +79,7 @@ class ConfigReader(
         validateUserDefinitions(userDefinitions)
     }
 
-    fun read(): ConfigObject {
+    fun read(): Config {
         try {
             definitions.putAll(getPrefixedEnvironmentVariables("env"))
             definitions.putAll(getPrefixedSystemProperties("system"))
@@ -93,7 +94,7 @@ class ConfigReader(
                 throw ConfigException("Expected EOF at position ${lookahead[0].pos}.")
             }
 
-            return ConfigObject(LinkedHashMap(mapBuilder.get()))
+            return ConfigImpl(ConfigObject(LinkedHashMap(mapBuilder.get())))
         } catch(ex: ConfigException) {
             throw ex
         } catch(ex: Exception) {

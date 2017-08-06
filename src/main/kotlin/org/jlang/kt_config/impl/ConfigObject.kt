@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package org.jlang.kt_config
+package org.jlang.kt_config.impl
 
-import org.jlang.kt_config.impl.composePath
+import org.jlang.kt_config.*
 import java.util.Properties
 import kotlin.collections.ArrayList
 import kotlin.collections.LinkedHashMap
@@ -29,36 +29,6 @@ import kotlin.collections.isEmpty
 import kotlin.collections.listOf
 
 
-/**
- * Holds the parsed configuration. A configuration is immutable and holds the
- * configuration as key / value pairs.
- *
- * A configuration:
- * `    common {`
- * `      user = "john.doe"`
- * `    }`
- * `    test {`
- * `      host = "foo.org"`
- * `      port = "8000"`
- * `    }`
- * `    uat {`
- * `      host = "foo.org"`
- * `      port = "9000"`
- * `    }`
- *
- * is parsed to the key / value pairs:
- * `    common.user = "john.doe"`
- * `    test.host = "foo.org"`
- * `    test.port = "8000"`
- * `    uat.host = "foo.org"`
- * `    uat.port = "9000"`
- *
- * a `getSubConfig("common", "uat")` returns a subset of configuration values
- * for the section "common" and "uat":
- * `    common.user = "john.doe"`
- * `    uat.host = "foo.org"`
- * `    uat.port = "9000"`
- */
 class ConfigObject(val map: MutableMap<String,String> = LinkedHashMap()) {
 
     fun toMap(): Map<String,String> = LinkedHashMap(map)

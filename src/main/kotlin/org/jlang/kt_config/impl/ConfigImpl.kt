@@ -1,8 +1,8 @@
-package jlang.kt_config.impl
+package org.jlang.kt_config.impl
 
-import jlang.kt_config.Config
+import org.jlang.kt_config.Config
 import org.jlang.kt_config.ConfigException
-import org.jlang.kt_config.ConfigObject
+import org.jlang.kt_config.impl.ConfigObject
 import java.util.*
 
 
@@ -49,7 +49,7 @@ class ConfigImpl(private val cfgObj: ConfigObject) : Config {
 
     override fun toProperties(): Properties = cfgObj.toProperties()
 
-    override fun getSubConfig(vararg sections: String): ConfigImpl =
+    override fun getSubConfig(vararg sections: String): Config =
             ConfigImpl(cfgObj.getSubConfig(sections.toList()))
 
 }
