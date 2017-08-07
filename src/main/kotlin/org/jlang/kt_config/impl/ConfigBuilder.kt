@@ -20,8 +20,8 @@ import java.util.ArrayDeque
 import java.util.Deque
 
 
-class ConfigMapBuilder {
-    private val config: MutableMap<String,String> = LinkedHashMap()
+class ConfigBuilder {
+    private val config = LinkedHashMap<String,ConfigValue>()
     private var pathStack: Deque<String> = ArrayDeque()
 
 
@@ -29,15 +29,12 @@ class ConfigMapBuilder {
 
     fun popPath(): String = pathStack.pop()
 
-    fun put(key: String, value: String): Unit {
-        config[composePath(currPath(), key)] = value
+    fun put(cfg: ConfigValue): Unit {
+        val c = cfg.rebase(composePath(currPath(), cfg.path))
+        config.put(c.path, c)
     }
 
-    fun put(key: String, index: Int, value: String): Unit {
-        config[composePath(currPath(), key, index)] = value
-    }
-
-    fun get(): Map<String,String>  = config
+    fun get(): Map<String,ConfigValue> = config
 
     private fun currPath(): String = pathStack.reversed().joinToString(".")
 }

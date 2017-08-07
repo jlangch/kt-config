@@ -64,9 +64,8 @@ class ConfigImpl(private val cfgObj: ConfigObject) : Config {
     override fun getSubConfig(vararg sections: String): Config =
             ConfigImpl(cfgObj.getSubConfig(sections.toList()))
 
-    override fun merge(config: Config): Config {
-        return this // TODO: implement (take care while merging arrays)
-    }
+    override fun merge(config: Config): Config =
+            ConfigImpl(cfgObj.merge(ConfigObject.create(config.toMap())))
 
     override fun empty(): Config = ConfigImpl(ConfigObject())
 

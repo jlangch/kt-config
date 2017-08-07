@@ -17,6 +17,7 @@
 package org.jlang.kt_config.impl
 
 import org.jlang.kt_config.*
+import java.net.URL
 import java.util.Properties
 import kotlin.collections.ArrayList
 import kotlin.collections.LinkedHashMap
@@ -44,55 +45,51 @@ import kotlin.collections.listOf
  */
 
 
-class ConfigObject(val map: MutableMap<String,String> = LinkedHashMap()) {
+class ConfigObject(private val map: Map<String,ConfigValue> = LinkedHashMap()) {
+    val cfgMap = LinkedHashMap(map)
 
-    fun toMap(): Map<String,String> = LinkedHashMap(map)
+    companion object Factory {
+        fun create(simpleMap: Map<String,String>): ConfigObject {
+            // TODO
+            return ConfigObject()
+        }
+    }
 
-    fun toProperties(): Properties = Properties().apply { map.forEach { k,v -> setProperty(k,v) } }
+    fun toMap(): Map<String,String> {
+        val simpleMap = LinkedHashMap<String,String>()
+        cfgMap.values.forEach{ simpleMap.putAll(it.toMap()) }
+        return simpleMap
+    }
+
+
+    fun toProperties(): Properties {
+        val props = Properties()
+        toMap().forEach { k,v -> props.setProperty(k,v) }
+        return props
+    }
 
     fun getSubConfig(sections: List<String>): ConfigObject {
         if (sections.isEmpty()) return ConfigObject()
 
         return ConfigObject().also { subConfig ->
             sections.forEach { path ->
-                val subPath = trimPath(path) + '.'
-                map.filter{ entry -> entry.key.startsWith(subPath) }
-                   .forEach{ k,v -> subConfig.put(k.substring(subPath.length), v) }
+                val subPath = path + '.'
+                cfgMap.values
+                        .filter{ v -> v.path.startsWith(subPath) }
+                        .forEach{ v -> subConfig.put(v.rebase(v.path.substring(subPath.length))) }
             }
         }
     }
 
-    fun isEmpty(): Boolean = map.isEmpty()
+    fun copy(): ConfigObject = ConfigObject.create(LinkedHashMap(toMap()))
+
+    fun isEmpty(): Boolean = cfgMap.isEmpty()
 
     fun hasPath(path: String): Boolean = hasValuePath(path) || hasListPath(path)
 
     fun get(path: String): String {
         if (hasValuePath(path)) {
-            return map[path]!!
-        }
-        else {
-            if (hasListPath(path)) {
-                throw ConfigException(
-                        "The configuration value $path does not exist." +
-                                "But there is a list value at the requested path")
-            }
-            else {
-                throw ConfigException(
-                        "The configuration value $path does not exist")
-            }
-        }
-    }
-
-    fun getList(path: String): List<String> {
-        if (hasValuePath(path)) {
-            return listOf(map[path]!!)
-        }
-        else if (hasListPath(path)) {
-            val size = map[composePath(path, "size")]!!.toInt()
-
-            return ArrayList<String>().apply {
-                for(ii in 1..size) { add(map[composePath(path, ii)]!!) }
-            }
+            return cfgMap.get(path)!!.value
         }
         else {
             throw ConfigException(
@@ -100,18 +97,37 @@ class ConfigObject(val map: MutableMap<String,String> = LinkedHashMap()) {
         }
     }
 
+    fun getList(path: String): List<String> {
+        if (hasPath(path)) {
+            return cfgMap.get(path)!!.values
+        }
+        else {
+            throw ConfigException(
+                    "The configuration values $path does not exist")
+        }
+    }
+
+    fun merge(config: ConfigObject): ConfigObject {
+        val mergedConfig = copy()
+
+        return mergedConfig
+    }
+
     override fun toString(): String =
-        map.entries
+        // TODO
+        cfgMap.entries
            .map { entry -> "$entry.key = $entry.value" }
            .joinToString("\n")
 
 
+    private fun hasValuePath(path: String): Boolean {
+        return cfgMap.get(path)?.singleValue ?: false
+    }
 
-    private fun hasValuePath(path: String): Boolean = map.containsKey(path)
+    private fun hasListPath(path: String): Boolean  {
+        return cfgMap.get(path)?.multiValue ?: false
+    }
 
-    private fun hasListPath(path: String): Boolean = map.containsKey(composePath(path, "size"))
+    private fun put(value: ConfigValue): Unit { cfgMap.put(value.path, value) }
 
-    private fun put(path: String, value: String): Unit { map.put(path, value) }
-
-    private fun trimPath(path: String) = path.trimEnd { it == '.' }
 }

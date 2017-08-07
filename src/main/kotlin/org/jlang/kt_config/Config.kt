@@ -55,9 +55,11 @@ interface Config {
 
     fun hasPath(path: String): Boolean
 
+
     fun get(path: String): String
 
     fun getList(path: String): List<String>
+
 
     fun getString(path: String): String
 
@@ -82,6 +84,7 @@ interface Config {
     fun getDouble(path: String): Double
 
     fun getDoubleList(path: String): List<Double>
+
 
     fun toMap(): Map<String,String>
 

@@ -54,9 +54,9 @@ class ConfigReader(
     // Actually a LL(2) parser is sufficient but LL(4) simplifies code
     val LOOKAHEAD_SIZE = 4
 
-    val lexer: Lexer = Lexer(StringReader(config.trim()))
-    val mapBuilder: ConfigMapBuilder = ConfigMapBuilder()
-    val definitions: MutableMap<String,String> = LinkedHashMap()
+    val lexer = Lexer(StringReader(config.trim()))
+    val builder = ConfigBuilder()
+    val definitions = LinkedHashMap<String,String>()
 
     // prime lookahead buffer with tokens
     var lookahead: MutableList<Token> =
@@ -128,7 +128,7 @@ class ConfigReader(
                 throw ConfigException("Expected EOF at position ${lookahead[0].pos}.")
             }
 
-            return ConfigImpl(ConfigObject(LinkedHashMap(mapBuilder.get())))
+            return ConfigImpl(ConfigObject(builder.get()))
         } catch(ex: ConfigException) {
             throw ex
         } catch(ex: Exception) {
@@ -181,9 +181,9 @@ class ConfigReader(
         if (lookahead[0].isType(IDENTIFIER, PATH) && lookahead[1].isType(EQUALS)) {
             if (lookahead[2].isType(STRING)) {
                 // single value: name = "value"
-                mapBuilder.put(
+                builder.put(ConfigValue.single(
                         lookahead[0].data,
-                        applyDefinitions(lookahead[2].data, lookahead[2].pos))
+                        applyDefinitions(lookahead[2].data, lookahead[2].pos)))
 
                 consume(3)
             }
@@ -215,32 +215,24 @@ class ConfigReader(
     }
 
     private fun parseConfigItem_MultiValues(name: String): Unit {
-        var valueIndex = 1
+        val values = ArrayList<String>()
 
         if (lookahead[0].isType(STRING)) {
-            mapBuilder.put(
-                    name,
-                    valueIndex++,
-                    applyDefinitions(lookahead[0].data, lookahead[0].pos))
-
+            values.add(applyDefinitions(lookahead[0].data, lookahead[0].pos))
             consume(1)
 
             while (lookahead[0].isType(COMMA) && lookahead[1].isType(STRING)) {
-                mapBuilder.put(
-                        name,
-                        valueIndex++,
-                        applyDefinitions(lookahead[1].data, lookahead[1].pos))
-
+                values.add(applyDefinitions(lookahead[1].data, lookahead[1].pos))
                 consume(2)
             }
         }
 
-        mapBuilder.put(composePath(name, "size"), (valueIndex-1).toString())
+        builder.put(ConfigValue.multi(name, values))
     }
 
     private fun parseSection(): Boolean {
         if (lookahead[0].isType(IDENTIFIER, PATH) && lookahead[1].isType(LBRACE)) {
-            mapBuilder.pushPath(lookahead[0].data)
+            builder.pushPath(lookahead[0].data)
             consume(2)
 
             // a section is built from any number of config items and sub sections
@@ -252,7 +244,7 @@ class ConfigReader(
             }
             consume(1)
 
-            mapBuilder.popPath()
+            builder.popPath()
 
             return true
         } else {

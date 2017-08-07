@@ -109,6 +109,14 @@ fun composePath(base: String, path: String): String {
     return if (base.isEmpty()) path else base + "." + path
 }
 
+fun splitPath(path: String): List<String> = path.split('.')
+
+fun isListPath(path: String): Boolean {
+    val numberRegex = Regex("^[0-9]+${'$'}")
+    val tail = splitPath(path).last()
+    return tail == "size" || numberRegex.matches(tail)
+}
+
 fun getPrefixedEnvironmentVariables(prefix: String): Map<String,String> =
         System.getenv()
                 .filterValues { v ->  v != null }
