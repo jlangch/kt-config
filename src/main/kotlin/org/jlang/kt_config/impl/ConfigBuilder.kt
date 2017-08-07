@@ -29,7 +29,7 @@ class ConfigBuilder {
 
     fun popPath(): String = pathStack.pop()
 
-    fun put(cfg: ConfigValue): Unit {
+    fun add(cfg: ConfigValue): Unit {
         val c = cfg.rebase(composePath(currPath(), cfg.path))
         config.put(c.path, c)
     }

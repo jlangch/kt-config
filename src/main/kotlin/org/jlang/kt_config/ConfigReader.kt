@@ -181,7 +181,7 @@ class ConfigReader(
         if (lookahead[0].isType(IDENTIFIER, PATH) && lookahead[1].isType(EQUALS)) {
             if (lookahead[2].isType(STRING)) {
                 // single value: name = "value"
-                builder.put(ConfigValue.single(
+                builder.add(ConfigValue.single(
                         lookahead[0].data,
                         applyDefinitions(lookahead[2].data, lookahead[2].pos)))
 
@@ -227,7 +227,7 @@ class ConfigReader(
             }
         }
 
-        builder.put(ConfigValue.multi(name, values))
+        builder.add(ConfigValue.multi(name, values))
     }
 
     private fun parseSection(): Boolean {
