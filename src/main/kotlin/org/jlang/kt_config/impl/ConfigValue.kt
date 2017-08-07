@@ -21,9 +21,9 @@ class ConfigValue(val path: String, val values: List<String>, val singleValue: B
             return mapOf( path to value )
         }
         else {
-            val map = HashMap<String, String>()
+            val map = LinkedHashMap<String, String>()
             map.put(composePath(path, "size"), values.size.toString())
-            values.withIndex().forEach { map.put(composePath(path, it.index), it.value) }
+            values.withIndex().forEach { map.put(composePath(path, it.index+1), it.value) }
             return map
         }
     }

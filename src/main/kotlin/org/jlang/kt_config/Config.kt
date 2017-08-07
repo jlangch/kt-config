@@ -92,6 +92,8 @@ interface Config {
 
     fun getSubConfig(vararg sections: String): Config
 
+    fun copy(): Config
+
     fun merge(config: Config): Config
 
     fun empty(): Config

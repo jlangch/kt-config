@@ -64,13 +64,20 @@ class ConfigImpl(private val cfgObj: ConfigObject) : Config {
     override fun getSubConfig(vararg sections: String): Config =
             ConfigImpl(cfgObj.getSubConfig(sections.toList()))
 
-    override fun merge(config: Config): Config =
-            ConfigImpl(cfgObj.merge(ConfigObject.create(config.toMap())))
+    override fun merge(config: Config): Config {
+        if (config is ConfigImpl) {
+            return ConfigImpl(cfgObj.merge(config.cfgObj))
+        }
+        else {
+            throw ConfigException("Invalid config type")
+        }
+    }
+
+    override fun copy(): Config = ConfigImpl(cfgObj.copy())
 
     override fun empty(): Config = ConfigImpl(ConfigObject())
 
     override fun toString(): String = cfgObj.toString()
-
 
     private fun toBoolean(value: String): Boolean {
         val lowerCaseValue = value.toLowerCase()

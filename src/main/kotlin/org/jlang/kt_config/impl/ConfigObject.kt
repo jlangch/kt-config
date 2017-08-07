@@ -17,50 +17,21 @@
 package org.jlang.kt_config.impl
 
 import org.jlang.kt_config.*
-import java.net.URL
 import java.util.Properties
-import kotlin.collections.ArrayList
 import kotlin.collections.LinkedHashMap
 import kotlin.collections.List
 import kotlin.collections.Map
-import kotlin.collections.MutableMap
 import kotlin.collections.filter
 import kotlin.collections.forEach
-import kotlin.collections.listOf
-
-/*
- * Copyright 2017 JLang
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * 	http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 
 
 class ConfigObject(private val map: Map<String,ConfigValue> = LinkedHashMap()) {
     val cfgMap = LinkedHashMap(map)
 
-    companion object Factory {
-        fun create(simpleMap: Map<String,String>): ConfigObject {
-            // TODO
-            return ConfigObject()
-        }
-    }
-
     fun toMap(): Map<String,String> {
-        val simpleMap = LinkedHashMap<String,String>()
-        cfgMap.values.forEach{ simpleMap.putAll(it.toMap()) }
-        return simpleMap
+        return LinkedHashMap<String,String>()
+                    .apply { cfgMap.values.forEach{ putAll(it.toMap()) } }
     }
-
 
     fun toProperties(): Properties {
         val props = Properties()
@@ -81,7 +52,7 @@ class ConfigObject(private val map: Map<String,ConfigValue> = LinkedHashMap()) {
         }
     }
 
-    fun copy(): ConfigObject = ConfigObject.create(LinkedHashMap(toMap()))
+    fun copy(): ConfigObject = ConfigObject(LinkedHashMap(cfgMap))
 
     fun isEmpty(): Boolean = cfgMap.isEmpty()
 
@@ -89,7 +60,7 @@ class ConfigObject(private val map: Map<String,ConfigValue> = LinkedHashMap()) {
 
     fun get(path: String): String {
         if (hasValuePath(path)) {
-            return cfgMap.get(path)!!.value
+            return cfgMap[path]!!.value
         }
         else {
             throw ConfigException(
@@ -99,7 +70,7 @@ class ConfigObject(private val map: Map<String,ConfigValue> = LinkedHashMap()) {
 
     fun getList(path: String): List<String> {
         if (hasPath(path)) {
-            return cfgMap.get(path)!!.values
+            return cfgMap[path]!!.values
         }
         else {
             throw ConfigException(
@@ -108,26 +79,25 @@ class ConfigObject(private val map: Map<String,ConfigValue> = LinkedHashMap()) {
     }
 
     fun merge(config: ConfigObject): ConfigObject {
-        val mergedConfig = copy()
-
-        return mergedConfig
+        return copy().apply { putAll(config.cfgMap.values) }
     }
 
     override fun toString(): String =
-        // TODO
-        cfgMap.entries
-           .map { entry -> "$entry.key = $entry.value" }
-           .joinToString("\n")
+            toMap().entries
+                   .map { entry -> "${entry.key} = ${entry.value}" }
+                   .joinToString("\n")
 
 
     private fun hasValuePath(path: String): Boolean {
-        return cfgMap.get(path)?.singleValue ?: false
+        return cfgMap[path]?.singleValue ?: false
     }
 
     private fun hasListPath(path: String): Boolean  {
-        return cfgMap.get(path)?.multiValue ?: false
+        return cfgMap[path]?.multiValue ?: false
     }
 
     private fun put(value: ConfigValue): Unit { cfgMap.put(value.path, value) }
+
+    private fun putAll(values: Collection<ConfigValue>): Unit { values.forEach { put(it) } }
 
 }
