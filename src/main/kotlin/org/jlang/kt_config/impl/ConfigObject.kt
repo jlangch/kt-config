@@ -100,6 +100,13 @@ class ConfigObject(val map: MutableMap<String,String> = LinkedHashMap()) {
         }
     }
 
+    override fun toString(): String =
+        map.entries
+           .map { entry -> "$entry.key = $entry.value" }
+           .joinToString("\n")
+
+
+
     private fun hasValuePath(path: String): Boolean = map.containsKey(path)
 
     private fun hasListPath(path: String): Boolean = map.containsKey(composePath(path, "size"))

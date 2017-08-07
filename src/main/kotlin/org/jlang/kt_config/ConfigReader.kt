@@ -18,6 +18,7 @@ package org.jlang.kt_config
 
 import org.jlang.kt_config.impl.*
 import org.jlang.kt_config.impl.TokenType.*
+import java.net.URL
 import java.io.Reader
 import java.io.BufferedReader
 import java.io.InputStream
@@ -62,6 +63,11 @@ class ConfigReader(
             ArrayList<Token>().apply { repeat(LOOKAHEAD_SIZE, { add(lexer.nextToken()) }) }
 
     companion object Factory {
+        fun create(
+                url: URL,
+                userDefinitions: Map<String, String> = HashMap()
+        ): ConfigReader = ConfigReader(slurp(url.openStream()), userDefinitions)
+
         fun create(
                 inStream: InputStream,
                 charset: Charset = Charsets.UTF_8,

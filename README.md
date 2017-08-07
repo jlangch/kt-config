@@ -4,21 +4,36 @@ kt-config
 Utility for reading configuration files. Configuration settings can be defined using dot and/or scoped notation.
 
 
-## Examples
+## Overview
 
-
-#### Scoped notation
+ - implemented in plain Kotlin with no dependencies
+ - can load from string, files, URLs, or classpath
+ - supports dot notation for names and nested sections
+ - override properties with Java system properties and environment variables
+ - global substitutions
+ 
+ 
+## Example
 
 ```
+def host = "foo.org"
+
 # Common section
 common {
   user = "john.doe"
 }
 
-# Test section
-test {
-  host = "foo.org"
-  port = "8000"
+# Database section
+db {
+  h2 {
+    driver = "org.h2.Driver"
+    url = "jdbc:h2:tcp://${host}:9567/~data/db;MVCC=TRUE"
+  }
+  
+  postgresql {
+    driver="org.postgresql.Driver"
+    url = "jdbc:postgresql://${host}:5432/serviceplanet"
+  }
 }
 ```
 

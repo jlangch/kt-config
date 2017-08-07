@@ -36,7 +36,7 @@ import java.util.*
  * `      port = "9000"`
  * `    }`
  *
- * is parsed to the key / value pairs:
+ * is parsed to the key/value pairs:
  * `    common.user = "john.doe"`
  * `    test.host = "foo.org"`
  * `    test.port = "8000"`
@@ -45,9 +45,9 @@ import java.util.*
  *
  * a `getSubConfig("common", "uat")` returns a subset of configuration values
  * for the section "common" and "uat":
- * `    common.user = "john.doe"`
- * `    uat.host = "foo.org"`
- * `    uat.port = "9000"`
+ * `    user = "john.doe"`
+ * `    host = "foo.org"`
+ * `    port = "9000"`
  */
 interface Config {
 
@@ -89,4 +89,7 @@ interface Config {
 
     fun getSubConfig(vararg sections: String): Config
 
+    fun merge(config: Config): Config
+
+    fun empty(): Config
 }
