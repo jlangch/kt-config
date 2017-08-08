@@ -77,8 +77,6 @@ class ConfigImpl(private val cfgObj: ConfigObject) : Config {
 
     override fun copy(): Config = ConfigImpl(cfgObj.copy())
 
-    override fun empty(): Config = ConfigImpl(ConfigObject())
-
     override fun toString(): String = cfgObj.toString()
 
     private fun toBoolean(value: String): Boolean {

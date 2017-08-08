@@ -25,19 +25,54 @@ class MultiValueConfigTest {
     @Test
     fun testString() {
         val config = """x {
-                       |   c_string_arr_1 = [ ]
-                       |   c_string_arr_2 = [ "foo1" ]
-                       |   c_string_arr_3 = [ "foo1", "foo2" ]
-                       |   c_string_arr_4 = [ "foo1", "foo2", "foo3" ]
+                       |   c_arr_1 = [ ]
+                       |   c_arr_2 = [ "foo1" ]
+                       |   c_arr_3 = [ "foo1", "foo2" ]
+                       |   c_arr_4 = [ "foo1", "foo2", "foo3" ]
                        |}
                      """.trimMargin()
 
         val cfg = ConfigReader(config).read()
 
-        Assert.assertEquals(cfg.getList("x.c_string_arr_1"), ArrayList<String>())
-        Assert.assertEquals(cfg.getList("x.c_string_arr_2"), listOf("foo1"))
-        Assert.assertEquals(cfg.getList("x.c_string_arr_3"), listOf("foo1", "foo2"))
-        Assert.assertEquals(cfg.getList("x.c_string_arr_4"), listOf("foo1", "foo2", "foo3"))
+        Assert.assertEquals(cfg.getList("x.c_arr_1"), ArrayList<String>())
+        Assert.assertEquals(cfg.getList("x.c_arr_2"), listOf("foo1"))
+        Assert.assertEquals(cfg.getList("x.c_arr_3"), listOf("foo1", "foo2"))
+        Assert.assertEquals(cfg.getList("x.c_arr_4"), listOf("foo1", "foo2", "foo3"))
     }
 
+    @Test
+    fun testInt() {
+        val config = """x {
+                       |   c_arr_1 = [ ]
+                       |   c_arr_2 = [ "10" ]
+                       |   c_arr_3 = [ "10", "20" ]
+                       |   c_arr_4 = [ "10", "20", "30" ]
+                       |}
+                     """.trimMargin()
+
+        val cfg = ConfigReader(config).read()
+
+        Assert.assertEquals(cfg.getIntList("x.c_arr_1"), ArrayList<Int>())
+        Assert.assertEquals(cfg.getIntList("x.c_arr_2"), listOf(10))
+        Assert.assertEquals(cfg.getIntList("x.c_arr_3"), listOf(10, 20))
+        Assert.assertEquals(cfg.getIntList("x.c_arr_4"), listOf(10, 20, 30))
+    }
+
+    @Test
+    fun testLong() {
+        val config = """x {
+                       |   c_arr_1 = [ ]
+                       |   c_arr_2 = [ "10" ]
+                       |   c_arr_3 = [ "10", "20" ]
+                       |   c_arr_4 = [ "10", "20", "30" ]
+                       |}
+                     """.trimMargin()
+
+        val cfg = ConfigReader(config).read()
+
+        Assert.assertEquals(cfg.getLongList("x.c_arr_1"), ArrayList<Int>())
+        Assert.assertEquals(cfg.getLongList("x.c_arr_2"), listOf(10L))
+        Assert.assertEquals(cfg.getLongList("x.c_arr_3"), listOf(10L, 20L))
+        Assert.assertEquals(cfg.getLongList("x.c_arr_4"), listOf(10L, 20L, 30L))
+    }
 }

@@ -97,6 +97,4 @@ interface Config {
     fun copy(): Config
 
     fun merge(config: Config): Config
-
-    fun empty(): Config
 }

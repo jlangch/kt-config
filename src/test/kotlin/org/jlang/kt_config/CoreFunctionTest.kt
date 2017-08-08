@@ -21,7 +21,7 @@ import org.testng.Assert
 import org.testng.annotations.Test
 
 
-class CoreTest {
+class CoreFunctionTest {
 
     @Test
     fun testPath() {

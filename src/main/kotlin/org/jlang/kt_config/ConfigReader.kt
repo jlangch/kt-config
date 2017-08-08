@@ -63,6 +63,7 @@ class ConfigReader(
             ArrayList<Token>().apply { repeat(LOOKAHEAD_SIZE, { add(lexer.nextToken()) }) }
 
     companion object Factory {
+
         fun create(
                 url: URL,
                 userDefinitions: Map<String, String> = HashMap()
@@ -91,6 +92,8 @@ class ConfigReader(
                 loader: ClassLoader,
                 userDefinitions: Map<String, String> = HashMap()
         ): ConfigReader = ConfigReader(slurp(classPathResource, loader), userDefinitions)
+
+        fun empty(): Config = ConfigImpl(ConfigObject())
 
         private fun slurp(inStream: InputStream, charset: Charset = Charsets.UTF_8): String {
             return BufferedReader(InputStreamReader(inStream, charset)).use {

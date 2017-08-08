@@ -24,8 +24,8 @@ class ConfigReaderTest {
 
     @Test
     fun testEmptyConfig() {
-        val map1 = ConfigReader("").read()
-        Assert.assertEquals(map1.size(), 0)
+        val cfg1 = ConfigReader("").read()
+        Assert.assertEquals(cfg1.size(), 0)
 
         val cfg2 = ConfigReader(" ").read()
         Assert.assertEquals(cfg2.size(), 0)
@@ -42,17 +42,17 @@ class ConfigReaderTest {
 
     @Test
     fun testSimpleConfig_Path() {
-        val map1 = ConfigReader("user = 'john.doe'").read()
+        val cfg1 = ConfigReader("user = 'john.doe'").read()
  
-        Assert.assertTrue(map1.hasPath("user"))
-        Assert.assertFalse(map1.hasPath("x"))
+        Assert.assertTrue(cfg1.hasPath("user"))
+        Assert.assertFalse(cfg1.hasPath("x"))
     }
 
     @Test
     fun testSimpleConfig_1item_DoubleQuotedValues() {
-        val map1 = ConfigReader("""user = "john.doe"""").read()
-        Assert.assertEquals(map1.size(), 1)
-        Assert.assertEquals(map1.get("user"), "john.doe")
+        val cfg1 = ConfigReader("""user = "john.doe"""").read()
+        Assert.assertEquals(cfg1.size(), 1)
+        Assert.assertEquals(cfg1.get("user"), "john.doe")
 
         val cfg2 = ConfigReader("""  user    =    "john.doe"    """).read()
         Assert.assertEquals(cfg2.size(), 1)
@@ -78,9 +78,9 @@ class ConfigReaderTest {
 
     @Test
     fun testSimpleConfig_1item_SingleQuotedValues() {
-        val map1 = ConfigReader("user = 'john.doe'").read()
-        Assert.assertEquals(map1.size(), 1)
-        Assert.assertEquals(map1.get("user"), "john.doe")
+        val cfg1 = ConfigReader("user = 'john.doe'").read()
+        Assert.assertEquals(cfg1.size(), 1)
+        Assert.assertEquals(cfg1.get("user"), "john.doe")
 
         val cfg2 = ConfigReader("  user    =    'john.doe'    ").read()
         Assert.assertEquals(cfg2.size(), 1)
@@ -128,10 +128,10 @@ class ConfigReaderTest {
 
     @Test
     fun testSimpleConfig_2item() {
-        val map1 = ConfigReader("host = 'foo.org' \n port = '8000'").read()
-        Assert.assertEquals(map1.size(), 2)
-        Assert.assertEquals(map1.get("host"), "foo.org")
-        Assert.assertEquals(map1.get("port"), "8000")
+        val cfg1 = ConfigReader("host = 'foo.org' \n port = '8000'").read()
+        Assert.assertEquals(cfg1.size(), 2)
+        Assert.assertEquals(cfg1.get("host"), "foo.org")
+        Assert.assertEquals(cfg1.get("port"), "8000")
 
         val cfg2 = ConfigReader("x.host = 'foo.org' \n x.y.port = '8000'").read()
         Assert.assertEquals(cfg2.size(), 2)
@@ -146,15 +146,15 @@ class ConfigReaderTest {
 
     @Test
     fun testSimpleConfig_DuplicateItem() {
-        val map1 = ConfigReader("user = 'john.doe' \n user = 'arthur.dent'").read()
-        Assert.assertEquals(map1.size(), 1)
-        Assert.assertEquals(map1.get("user"), "arthur.dent")
+        val cfg1 = ConfigReader("user = 'john.doe' \n user = 'arthur.dent'").read()
+        Assert.assertEquals(cfg1.size(), 1)
+        Assert.assertEquals(cfg1.get("user"), "arthur.dent")
     }
 
     @Test
     fun testEmptySection() {
-        val map1 = ConfigReader("section1 { }").read()
-        Assert.assertEquals(map1.size(), 0)
+        val cfg1 = ConfigReader("section1 { }").read()
+        Assert.assertEquals(cfg1.size(), 0)
 
         val cfg2 = ConfigReader("section1 { } \n section2 { }").read()
         Assert.assertEquals(cfg2.size(), 0)
@@ -267,92 +267,6 @@ class ConfigReaderTest {
 
         Assert.assertEquals(cfg.size(), 1)
         Assert.assertEquals(cfg.get("a.b.c.d.e.f.g.x"), "1")
-    }
-
-    @Test
-    fun testComplexWithDefinition_Stream() {
-        val config = """def home = "/foo/org"
-                       |
-                       |user = "john.doe"
-                       |section1 {
-                       |   host = "foo.org"
-                       |   port = "8000"
-                       |   path = "${'$'}{home}/abc"
-                       |}
-                     """.trimMargin()
-
-        val cfg = ConfigReader.create(config.byteInputStream()).read()
-
-        Assert.assertEquals(cfg.size(), 4)
-        Assert.assertEquals(cfg.get("user"), "john.doe")
-        Assert.assertEquals(cfg.get("section1.host"), "foo.org")
-        Assert.assertEquals(cfg.get("section1.port"), "8000")
-        Assert.assertEquals(cfg.get("section1.path"), "/foo/org/abc")
-    }
-
-    @Test
-    fun testComplexWithDefinition_SubConfig_Map() {
-        val config = """def home = "/foo/org"
-                       |
-                       |section1 {
-                       |   user = "john.doe"
-                       |}
-                       |section2 {
-                       |   host = "foo.org"
-                       |   port = "8000"
-                       |   path = "${'$'}{home}/abc"
-                       |}
-                     """.trimMargin()
-
-        val cfg = ConfigReader(config).read()
-        Assert.assertEquals(cfg.size(), 4)
-
-        val cfg2 = ConfigReader(config).read().getSubConfig("section1", "section2")
-        Assert.assertEquals(cfg2.size(), 4)
-        Assert.assertEquals(cfg2.get("user"), "john.doe")
-        Assert.assertEquals(cfg2.get("host"), "foo.org")
-        Assert.assertEquals(cfg2.get("port"), "8000")
-        Assert.assertEquals(cfg2.get("path"), "/foo/org/abc")
-
-        val cfg3 = ConfigReader(config).read().getSubConfig("section1")
-        Assert.assertEquals(cfg3.size(), 1)
-        Assert.assertEquals(cfg3.get("user"), "john.doe")
-
-        val cfg4 = ConfigReader(config).read().getSubConfig("section2")
-        Assert.assertEquals(cfg4.size(), 3)
-        Assert.assertEquals(cfg4.get("host"), "foo.org")
-        Assert.assertEquals(cfg4.get("port"), "8000")
-        Assert.assertEquals(cfg4.get("path"), "/foo/org/abc")
-
-        val cfg5 = ConfigReader(config).read().getSubConfig("xxxx")
-        Assert.assertEquals(cfg5.size(), 0)
-
-        val cfg6 = ConfigReader(config).read().getSubConfig("")
-        Assert.assertEquals(cfg6.size(), 0)
-    }
-
-    @Test
-    fun testComplexWithDefinition_SubConfig_Map_MergePrecedence() {
-        val config = """def home = "/foo/org"
-                       |
-                       |section1 {
-                       |   port = "1000"
-                       |}
-                       |section2 {
-                       |   port = "2000"
-                       |}
-                     """.trimMargin()
-
-        val cfg = ConfigReader(config).read()
-        Assert.assertEquals(cfg.size(), 2)
-
-        val cfg2 = ConfigReader(config).read().getSubConfig("section1", "section2")
-        Assert.assertEquals(cfg2.size(), 1)
-        Assert.assertEquals(cfg2.get("port"), "2000")
-
-        val cfg3 = ConfigReader(config).read().getSubConfig("section2", "section1")
-        Assert.assertEquals(cfg3.size(), 1)
-        Assert.assertEquals(cfg3.get("port"), "1000")
     }
 
     @Test
