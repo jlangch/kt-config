@@ -243,7 +243,7 @@ class ConfigReader(
 
             if (lookahead[0].isNotType(RBRACE)) {
                 throw ConfigException(
-                        "Expected section close '{' at position ${lookahead[0].pos}.")
+                        "Expected section close '}' at position ${lookahead[0].pos}.")
             }
             consume(1)
 
