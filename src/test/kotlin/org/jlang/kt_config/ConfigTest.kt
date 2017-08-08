@@ -77,7 +77,7 @@ class ConfigTest {
     @Test
     fun testCreateFromClasspath() {
         val cfg = ConfigReader.create(
-                        "jlang/kt_config/test.config",
+                        "org/jlang/kt_config/test.config",
                         this.javaClass.getClassLoader()
                     ).read()
 
