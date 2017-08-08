@@ -18,6 +18,7 @@ package org.jlang.kt_config
 
 import org.testng.Assert
 import org.testng.annotations.Test
+import java.math.BigDecimal
 
 
 class TypedConfigTest {
@@ -118,6 +119,20 @@ class TypedConfigTest {
 
         Assert.assertEquals(cfg.getDouble("x.c_double_1"), 100.0, 0.00001)
         Assert.assertEquals(cfg.getDouble("x.c_double_2"), -100.0, 0.00001)
+    }
+
+    @Test
+    fun testDecimal() {
+        val config = """x {
+                       |   c_double_1 = "100.0"
+                       |   c_double_2 = "-100.0"
+                       |}
+                     """.trimMargin()
+
+        val cfg = ConfigReader(config).read()
+
+        Assert.assertEquals(cfg.getDecimal("x.c_double_1"), BigDecimal("100.0"))
+        Assert.assertEquals(cfg.getDecimal("x.c_double_2"), BigDecimal("-100.0"))
     }
 
 }

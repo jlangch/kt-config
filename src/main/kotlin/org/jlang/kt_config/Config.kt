@@ -16,6 +16,7 @@
 
 package org.jlang.kt_config
 
+import java.math.BigDecimal
 import java.util.*
 
 
@@ -86,6 +87,10 @@ interface Config {
     fun getDouble(path: String): Double
 
     fun getDoubleList(path: String): List<Double>
+
+    fun getDecimal(path: String): BigDecimal
+
+    fun getDecimalList(path: String): List<BigDecimal>
 
 
     fun toMap(): Map<String,String>

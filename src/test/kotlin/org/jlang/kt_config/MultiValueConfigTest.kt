@@ -75,4 +75,60 @@ class MultiValueConfigTest {
         Assert.assertEquals(cfg.getLongList("x.c_arr_3"), listOf(10L, 20L))
         Assert.assertEquals(cfg.getLongList("x.c_arr_4"), listOf(10L, 20L, 30L))
     }
+
+    @Test
+    fun testFloat() {
+        val config = """x {
+                       |   c_arr_1 = [ ]
+                       |   c_arr_2 = [ "10.01" ]
+                       |   c_arr_3 = [ "10.01", "20.02" ]
+                       |   c_arr_4 = [ "10.01", "20.02", "30.03" ]
+                       |}
+                     """.trimMargin()
+
+        val cfg = ConfigReader(config).read()
+
+        val fl1 = cfg.getFloatList("x.c_arr_1")
+        Assert.assertTrue(fl1.isEmpty())
+
+        val fl2 = cfg.getFloatList("x.c_arr_2")
+        Assert.assertEquals(fl2[0], 10.01F, 0.0001F)
+
+        val fl3 = cfg.getFloatList("x.c_arr_3")
+        Assert.assertEquals(fl3[0], 10.01F, 0.0001F)
+        Assert.assertEquals(fl3[1], 20.02F, 0.0001F)
+
+        val fl4 = cfg.getFloatList("x.c_arr_4")
+        Assert.assertEquals(fl4[0], 10.01F, 0.0001F)
+        Assert.assertEquals(fl4[1], 20.02F, 0.0001F)
+        Assert.assertEquals(fl4[2], 30.03F, 0.0001F)
+    }
+
+    @Test
+    fun testDouble() {
+        val config = """x {
+                       |   c_arr_1 = [ ]
+                       |   c_arr_2 = [ "10.01" ]
+                       |   c_arr_3 = [ "10.01", "20.02" ]
+                       |   c_arr_4 = [ "10.01", "20.02", "30.03" ]
+                       |}
+                     """.trimMargin()
+
+        val cfg = ConfigReader(config).read()
+
+        val fl1 = cfg.getDoubleList("x.c_arr_1")
+        Assert.assertTrue(fl1.isEmpty())
+
+        val fl2 = cfg.getDoubleList("x.c_arr_2")
+        Assert.assertEquals(fl2[0], 10.01, 0.0001)
+
+        val fl3 = cfg.getDoubleList("x.c_arr_3")
+        Assert.assertEquals(fl3[0], 10.01, 0.0001)
+        Assert.assertEquals(fl3[1], 20.02, 0.0001)
+
+        val fl4 = cfg.getDoubleList("x.c_arr_4")
+        Assert.assertEquals(fl4[0], 10.01, 0.0001)
+        Assert.assertEquals(fl4[1], 20.02, 0.0001)
+        Assert.assertEquals(fl4[2], 30.03, 0.0001)
+    }
 }

@@ -18,6 +18,7 @@ package org.jlang.kt_config.impl
 
 import org.jlang.kt_config.Config
 import org.jlang.kt_config.ConfigException
+import java.math.BigDecimal
 import java.util.*
 
 
@@ -58,6 +59,10 @@ class ConfigImpl(private val cfgObj: ConfigObject) : Config {
     override fun getDouble(path: String): Double = getString(path).toDouble()
 
     override fun getDoubleList(path: String): List<Double> = getList(path).map { it.toDouble() }
+
+    override fun getDecimal(path: String): BigDecimal = BigDecimal(getString(path))
+
+    override fun getDecimalList(path: String): List<BigDecimal> = getList(path).map { BigDecimal(it) }
 
     override fun toMap(): Map<String,String> = cfgObj.toMap()
 

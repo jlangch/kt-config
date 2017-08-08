@@ -25,25 +25,31 @@ class ConfigReaderTest {
     @Test
     fun testEmptyConfig() {
         val cfg1 = ConfigReader("").read()
+        Assert.assertTrue(cfg1.isEmpty())
         Assert.assertEquals(cfg1.size(), 0)
 
         val cfg2 = ConfigReader(" ").read()
+        Assert.assertTrue(cfg2.isEmpty())
         Assert.assertEquals(cfg2.size(), 0)
 
         val cfg3 = ConfigReader("   ").read()
+        Assert.assertTrue(cfg3.isEmpty())
         Assert.assertEquals(cfg3.size(), 0)
 
         val cfg4 = ConfigReader("\n").read()
+        Assert.assertTrue(cfg4.isEmpty())
         Assert.assertEquals(cfg4.size(), 0)
 
         val cfg5 = ConfigReader("\n\n\n").read()
+        Assert.assertTrue(cfg5.isEmpty())
         Assert.assertEquals(cfg5.size(), 0)
     }
 
     @Test
     fun testSimpleConfig_Path() {
         val cfg1 = ConfigReader("user = 'john.doe'").read()
- 
+
+        Assert.assertEquals(cfg1.size(), 1)
         Assert.assertTrue(cfg1.hasPath("user"))
         Assert.assertFalse(cfg1.hasPath("x"))
     }
@@ -114,16 +120,6 @@ class ConfigReaderTest {
         Assert.assertEquals(ConfigReader("""x = " \" """").read().get("x"), " \" ")
         Assert.assertEquals(ConfigReader("""x = " \n """").read().get("x"), " \n ")
         Assert.assertEquals(ConfigReader("""x = " \t """").read().get("x"), " \t ")
-    }
-
-    @Test(expectedExceptions = arrayOf(ConfigException::class))
-    fun testInvalidLineBreakInString_1() {
-        ConfigReader("x = ' \n '").read()
-    }
-
-    @Test(expectedExceptions = arrayOf(ConfigException::class))
-    fun testInvalidLineBreakInString_2() {
-        ConfigReader("x = \" \n \"").read()
     }
 
     @Test
@@ -365,88 +361,6 @@ class ConfigReaderTest {
 
         val cfg = ConfigReader(config).read()
         Assert.assertEquals(cfg.get("section1.host"), "foo.org")
-    }
-
-    @Test(expectedExceptions = arrayOf(ConfigException::class))
-    fun testComplexWithTrailingChars() {
-        val config = """section1 {
-                       |   host = "foo.org"
-                       |}  a
-                     """.trimMargin()
-
-        ConfigReader(config).read()
-    }
-
-    @Test(expectedExceptions = arrayOf(ConfigException::class))
-    fun testUnresolvedDefinition() {
-        val config = """section1 {
-                       |   host = "foo.org"
-                       |   port = "8000"
-                       |   path = "${'$'}{home}/abc"
-                       |}
-                     """.trimMargin()
-
-        ConfigReader(config).read()
-    }
-
-    @Test(expectedExceptions = arrayOf(ConfigException::class))
-    fun testInvalidConfigItem_MissingEqualsAndValue() {
-        ConfigReader("user ").read()
-    }
-
-    @Test(expectedExceptions = arrayOf(ConfigException::class))
-    fun testInvalidConfigItem_MissingValue() {
-        ConfigReader("user = ").read()
-    }
-
-    @Test(expectedExceptions = arrayOf(ConfigException::class))
-    fun testInvalidConfigItem_MissingEquals() {
-        ConfigReader("user john").read()
-    }
-
-    @Test(expectedExceptions = arrayOf(ConfigException::class))
-    fun testInvalidString_NotQuoted() {
-        ConfigReader("user = john").read()
-    }
-
-    @Test(expectedExceptions = arrayOf(ConfigException::class))
-    fun testInvalidString_InvalidQuoting() {
-        ConfigReader("user = 'john").read()
-    }
-
-    @Test(expectedExceptions = arrayOf(ConfigException::class))
-    fun testInvalidString_lf() {
-         ConfigReader("user = 'john\n.doe'").read()
-    }
-
-    @Test(expectedExceptions = arrayOf(ConfigException::class))
-    fun testInvalidString_cr() {
-        ConfigReader("user = 'john\r.doe'").read()
-    }
-
-    @Test
-    fun testValidString_tab() {
-        ConfigReader("user = 'john\t.doe'").read()
-    }
-
-    @Test(expectedExceptions = arrayOf(ConfigException::class))
-    fun testInvalidSection_MissingClose() {
-        val config = """section1 {
-                       |   host = "foo.org"
-                       |
-                     """.trimMargin()
-
-        ConfigReader(config).read()
-    }
-
-    @Test(expectedExceptions = arrayOf(ConfigException::class))
-    fun testBadEOF() {
-        val config = """section1 {
-                       |   host = "foo.org"
-                       |} xxxx
-                     """.trimMargin()
-
-        ConfigReader(config).read()
     }
 
 }
