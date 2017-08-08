@@ -172,5 +172,5 @@ class Lexer(private val reader: StringReader) {
     private fun isIdentifierChar(ch: Char?): Boolean =
         isIdentifierStartChar(ch) || ch in '0'..'9' || ch == '_'
 
-    private fun isAnyChar(ch: Char?): Boolean = !isWhitespaceChar(ch)
+    private fun isAnyChar(ch: Char?): Boolean = ch != null && !isWhitespaceChar(ch)
 }

@@ -29,9 +29,9 @@ class ConfigBuilder {
 
     fun popPath(): String = pathStack.pop()
 
-    fun add(cfg: ConfigValue): Unit {
-        val c = cfg.rebase(composePath(currPath(), cfg.path))
-        config.put(c.path, c)
+    fun add(value: ConfigValue): Unit {
+        value.rebase(composePath(currPath(), value.path))
+             .let { config.put(it.path, it) }
     }
 
     fun get(): Map<String,ConfigValue> = config

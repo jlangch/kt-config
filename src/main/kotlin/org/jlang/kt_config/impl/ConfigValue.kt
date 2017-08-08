@@ -17,7 +17,11 @@
 package org.jlang.kt_config.impl
 
 
-class ConfigValue(val path: String, val values: List<String>, val singleValue: Boolean) {
+class ConfigValue private constructor(
+        val path: String,
+        val values: List<String>,
+        val singleValue: Boolean
+) {
 
     companion object Factory {
         fun single(path: String, value: String) : ConfigValue {

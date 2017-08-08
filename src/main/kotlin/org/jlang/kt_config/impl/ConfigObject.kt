@@ -34,9 +34,7 @@ class ConfigObject(private val map: Map<String,ConfigValue> = LinkedHashMap()) {
     }
 
     fun toProperties(): Properties {
-        val props = Properties()
-        toMap().forEach { k,v -> props.setProperty(k,v) }
-        return props
+        return Properties().also { props -> toMap().forEach { k,v -> props.setProperty(k,v) } }
     }
 
     fun getSubConfig(sections: List<String>): ConfigObject {
