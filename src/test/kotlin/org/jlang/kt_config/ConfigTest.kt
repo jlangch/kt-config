@@ -76,10 +76,7 @@ class ConfigTest {
 
     @Test
     fun testCreateFromClasspath() {
-        val cfg = ConfigReader.create(
-                        "org/jlang/kt_config/test.config",
-                        this.javaClass.getClassLoader()
-                    ).read()
+        val cfg = ConfigReader.create("org/jlang/kt_config/test.config").read()
 
         Assert.assertEquals(cfg.size(), 3)
         Assert.assertEquals(cfg.get("user"), "john.doe")
@@ -89,7 +86,7 @@ class ConfigTest {
 
     @Test
     fun testEmptyConfig() {
-         val cfg = ConfigReader.empty()
+        val cfg = ConfigReader.empty()
 
         Assert.assertTrue(cfg.isEmpty())
         Assert.assertEquals(cfg.size(), 0)
