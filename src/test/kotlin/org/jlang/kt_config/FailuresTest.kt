@@ -1,7 +1,5 @@
-package jlang.kt_config
+package org.jlang.kt_config
 
-import org.jlang.kt_config.ConfigException
-import org.jlang.kt_config.ConfigReader
 import org.testng.annotations.Test
 
 

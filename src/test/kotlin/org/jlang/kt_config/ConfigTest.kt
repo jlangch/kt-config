@@ -32,12 +32,12 @@ class ConfigTest {
                        |}
                      """.trimMargin()
 
-        val map = ConfigReader.create(config.byteInputStream()).read().toMap()
+        val cfg = ConfigReader.create(config.byteInputStream()).read()
 
-        Assert.assertEquals(map.size, 3)
-        Assert.assertEquals(map.get("user"), "john.doe")
-        Assert.assertEquals(map.get("section1.host"), "foo.org")
-        Assert.assertEquals(map.get("section1.port"), "8000")
+        Assert.assertEquals(cfg.size(), 3)
+        Assert.assertEquals(cfg.get("user"), "john.doe")
+        Assert.assertEquals(cfg.get("section1.host"), "foo.org")
+        Assert.assertEquals(cfg.get("section1.port"), "8000")
     }
 
     @Test
@@ -49,12 +49,12 @@ class ConfigTest {
                        |}
                      """.trimMargin()
 
-        val map = ConfigReader.create(config.byteInputStream(), Charsets.UTF_8).read().toMap()
+        val cfg = ConfigReader.create(config.byteInputStream(), Charsets.UTF_8).read()
 
-        Assert.assertEquals(map.size, 3)
-        Assert.assertEquals(map.get("user"), "john.doe")
-        Assert.assertEquals(map.get("section1.host"), "foo.org")
-        Assert.assertEquals(map.get("section1.port"), "8000")
+        Assert.assertEquals(cfg.size(), 3)
+        Assert.assertEquals(cfg.get("user"), "john.doe")
+        Assert.assertEquals(cfg.get("section1.host"), "foo.org")
+        Assert.assertEquals(cfg.get("section1.port"), "8000")
     }
 
     @Test
@@ -66,12 +66,25 @@ class ConfigTest {
                        |}
                      """.trimMargin()
 
-        val map = ConfigReader.create(StringReader(config)).read().toMap()
+        val cfg = ConfigReader.create(StringReader(config)).read()
 
-        Assert.assertEquals(map.size, 3)
-        Assert.assertEquals(map.get("user"), "john.doe")
-        Assert.assertEquals(map.get("section1.host"), "foo.org")
-        Assert.assertEquals(map.get("section1.port"), "8000")
+        Assert.assertEquals(cfg.size(), 3)
+        Assert.assertEquals(cfg.get("user"), "john.doe")
+        Assert.assertEquals(cfg.get("section1.host"), "foo.org")
+        Assert.assertEquals(cfg.get("section1.port"), "8000")
+    }
+
+    @Test
+    fun testCreateFromClasspath() {
+        val cfg = ConfigReader.create(
+                        "jlang/kt_config/test.config",
+                        this.javaClass.getClassLoader()
+                    ).read()
+
+        Assert.assertEquals(cfg.size(), 3)
+        Assert.assertEquals(cfg.get("user"), "john.doe")
+        Assert.assertEquals(cfg.get("section1.host"), "foo.org")
+        Assert.assertEquals(cfg.get("section1.port"), "8000")
     }
 
     @Test
