@@ -51,6 +51,8 @@ import java.util.*
  */
 interface Config {
 
+    fun size(): Int
+
     fun isEmpty(): Boolean
 
     fun hasPath(path: String): Boolean

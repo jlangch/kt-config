@@ -29,9 +29,10 @@ class ConfigObject(private val map: Map<String,ConfigValue> = LinkedHashMap()) {
     val cfgMap = LinkedHashMap(map)
 
     fun toMap(): Map<String,String> {
-        return LinkedHashMap<String,String>()
-                    .apply { cfgMap.values.forEach{ putAll(it.toMap()) } }
-    }
+        return cfgMap.values.fold(
+                    LinkedHashMap<String,String>(),
+                    { map,value -> map.putAll(value.toMap()); map } )
+     }
 
     fun toProperties(): Properties {
         return Properties().also { props -> toMap().forEach { k,v -> props.setProperty(k,v) } }
@@ -51,6 +52,8 @@ class ConfigObject(private val map: Map<String,ConfigValue> = LinkedHashMap()) {
     }
 
     fun copy(): ConfigObject = ConfigObject(LinkedHashMap(cfgMap))
+
+    fun size(): Int = cfgMap.size
 
     fun isEmpty(): Boolean = cfgMap.isEmpty()
 

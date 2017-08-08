@@ -41,10 +41,10 @@ class ConfigValue private constructor(
             return mapOf( path to value )
         }
         else {
-            val map = LinkedHashMap<String, String>()
-            map.put(composePath(path, "size"), values.size.toString())
-            values.withIndex().forEach { map.put(composePath(path, it.index+1), it.value) }
-            return map
+            return LinkedHashMap<String, String>().also { map ->
+                map.put(composePath(path, "size"), values.size.toString())
+                values.withIndex().forEach { map.put(composePath(path, it.index+1), it.value) }
+            }
         }
     }
 

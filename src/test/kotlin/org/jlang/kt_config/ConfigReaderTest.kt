@@ -24,87 +24,83 @@ class ConfigReaderTest {
 
     @Test
     fun testEmptyConfig() {
-        val map1 = ConfigReader("").read().toMap()
-        Assert.assertEquals(map1.size, 0)
+        val map1 = ConfigReader("").read()
+        Assert.assertEquals(map1.size(), 0)
 
-        val map2 = ConfigReader(" ").read().toMap()
-        Assert.assertEquals(map2.size, 0)
+        val cfg2 = ConfigReader(" ").read()
+        Assert.assertEquals(cfg2.size(), 0)
 
-        val map3 = ConfigReader("   ").read().toMap()
-        Assert.assertEquals(map3.size, 0)
+        val cfg3 = ConfigReader("   ").read()
+        Assert.assertEquals(cfg3.size(), 0)
 
-        val map4 = ConfigReader("\n").read().toMap()
-        Assert.assertEquals(map4.size, 0)
+        val cfg4 = ConfigReader("\n").read()
+        Assert.assertEquals(cfg4.size(), 0)
 
-        val map5 = ConfigReader("\n\n\n").read().toMap()
-        Assert.assertEquals(map5.size, 0)
+        val cfg5 = ConfigReader("\n\n\n").read()
+        Assert.assertEquals(cfg5.size(), 0)
     }
 
     @Test
-    fun testSimpleConfig_getDefault() {
-        val map1 = ConfigReader("user = 'john.doe'").read().toMap()
-        Assert.assertEquals(map1.size, 1)
-        Assert.assertEquals(map1.get("user"), "john.doe")
-        Assert.assertEquals(map1.getOrDefault("user", "arthur.dent"), "john.doe")
-
-        Assert.assertEquals(map1.get("x"), null)
-        Assert.assertEquals(map1.getOrDefault("x", null), null)
-        Assert.assertEquals(map1.getOrDefault("x", "arthur.dent"), "arthur.dent")
+    fun testSimpleConfig_Path() {
+        val map1 = ConfigReader("user = 'john.doe'").read()
+ 
+        Assert.assertTrue(map1.hasPath("user"))
+        Assert.assertFalse(map1.hasPath("x"))
     }
 
     @Test
     fun testSimpleConfig_1item_DoubleQuotedValues() {
-        val map1 = ConfigReader("""user = "john.doe"""").read().toMap()
-        Assert.assertEquals(map1.size, 1)
+        val map1 = ConfigReader("""user = "john.doe"""").read()
+        Assert.assertEquals(map1.size(), 1)
         Assert.assertEquals(map1.get("user"), "john.doe")
 
-        val map2 = ConfigReader("""  user    =    "john.doe"    """).read().toMap()
-        Assert.assertEquals(map2.size, 1)
-        Assert.assertEquals(map2.get("user"), "john.doe")
+        val cfg2 = ConfigReader("""  user    =    "john.doe"    """).read()
+        Assert.assertEquals(cfg2.size(), 1)
+        Assert.assertEquals(cfg2.get("user"), "john.doe")
 
-        val map3 = ConfigReader("\n\n\nuser = \"john.doe\"\n\n\n").read().toMap()
-        Assert.assertEquals(map3.size, 1)
-        Assert.assertEquals(map3.get("user"), "john.doe")
+        val cfg3 = ConfigReader("\n\n\nuser = \"john.doe\"\n\n\n").read()
+        Assert.assertEquals(cfg3.size(), 1)
+        Assert.assertEquals(cfg3.get("user"), "john.doe")
 
-        val map4 = ConfigReader("""x.user = "john.doe"""").read().toMap()
-        Assert.assertEquals(map4.size, 1)
-        Assert.assertEquals(map4.get("x.user"), "john.doe")
+        val cfg4 = ConfigReader("""x.user = "john.doe"""").read()
+        Assert.assertEquals(cfg4.size(), 1)
+        Assert.assertEquals(cfg4.get("x.user"), "john.doe")
 
-        val map5 = ConfigReader("""x.y.user = "john.doe"""").read().toMap()
-        Assert.assertEquals(map5.size, 1)
-        Assert.assertEquals(map5.get("x.y.user"), "john.doe")
+        val cfg5 = ConfigReader("""x.y.user = "john.doe"""").read()
+        Assert.assertEquals(cfg5.size(), 1)
+        Assert.assertEquals(cfg5.get("x.y.user"), "john.doe")
 
-        val map6 = ConfigReader("""user = "j'o'h'n.d'o'e"""").read().toMap()
-        Assert.assertEquals(map6.size, 1)
-        Assert.assertEquals(map6.get("user"), "j'o'h'n.d'o'e")
+        val cfg6 = ConfigReader("""user = "j'o'h'n.d'o'e"""").read()
+        Assert.assertEquals(cfg6.size(), 1)
+        Assert.assertEquals(cfg6.get("user"), "j'o'h'n.d'o'e")
     }
 
 
     @Test
     fun testSimpleConfig_1item_SingleQuotedValues() {
-        val map1 = ConfigReader("user = 'john.doe'").read().toMap()
-        Assert.assertEquals(map1.size, 1)
+        val map1 = ConfigReader("user = 'john.doe'").read()
+        Assert.assertEquals(map1.size(), 1)
         Assert.assertEquals(map1.get("user"), "john.doe")
 
-        val map2 = ConfigReader("  user    =    'john.doe'    ").read().toMap()
-        Assert.assertEquals(map2.size, 1)
-        Assert.assertEquals(map2.get("user"), "john.doe")
+        val cfg2 = ConfigReader("  user    =    'john.doe'    ").read()
+        Assert.assertEquals(cfg2.size(), 1)
+        Assert.assertEquals(cfg2.get("user"), "john.doe")
 
-        val map3 = ConfigReader("\n\n\nuser = 'john.doe'\n\n\n").read().toMap()
-        Assert.assertEquals(map3.size, 1)
-        Assert.assertEquals(map3.get("user"), "john.doe")
+        val cfg3 = ConfigReader("\n\n\nuser = 'john.doe'\n\n\n").read()
+        Assert.assertEquals(cfg3.size(), 1)
+        Assert.assertEquals(cfg3.get("user"), "john.doe")
 
-        val map4 = ConfigReader("x.user = 'john.doe'").read().toMap()
-        Assert.assertEquals(map4.size, 1)
-        Assert.assertEquals(map4.get("x.user"), "john.doe")
+        val cfg4 = ConfigReader("x.user = 'john.doe'").read()
+        Assert.assertEquals(cfg4.size(), 1)
+        Assert.assertEquals(cfg4.get("x.user"), "john.doe")
 
-        val map5 = ConfigReader("x.y.user = 'john.doe'").read().toMap()
-        Assert.assertEquals(map5.size, 1)
-        Assert.assertEquals(map5.get("x.y.user"), "john.doe")
+        val cfg5 = ConfigReader("x.y.user = 'john.doe'").read()
+        Assert.assertEquals(cfg5.size(), 1)
+        Assert.assertEquals(cfg5.get("x.y.user"), "john.doe")
 
-        val map6 = ConfigReader("""user = 'j"o"h"n.d"o"e'""").read().toMap()
-        Assert.assertEquals(map6.size, 1)
-        Assert.assertEquals(map6.get("user"), "j\"o\"h\"n.d\"o\"e")
+        val cfg6 = ConfigReader("""user = 'j"o"h"n.d"o"e'""").read()
+        Assert.assertEquals(cfg6.size(), 1)
+        Assert.assertEquals(cfg6.get("user"), "j\"o\"h\"n.d\"o\"e")
     }
 
     @Test
@@ -132,39 +128,39 @@ class ConfigReaderTest {
 
     @Test
     fun testSimpleConfig_2item() {
-        val map1 = ConfigReader("host = 'foo.org' \n port = '8000'").read().toMap()
-        Assert.assertEquals(map1.size, 2)
+        val map1 = ConfigReader("host = 'foo.org' \n port = '8000'").read()
+        Assert.assertEquals(map1.size(), 2)
         Assert.assertEquals(map1.get("host"), "foo.org")
         Assert.assertEquals(map1.get("port"), "8000")
 
-        val map2 = ConfigReader("x.host = 'foo.org' \n x.y.port = '8000'").read().toMap()
-        Assert.assertEquals(map2.size, 2)
-        Assert.assertEquals(map2.get("x.host"), "foo.org")
-        Assert.assertEquals(map2.get("x.y.port"), "8000")
+        val cfg2 = ConfigReader("x.host = 'foo.org' \n x.y.port = '8000'").read()
+        Assert.assertEquals(cfg2.size(), 2)
+        Assert.assertEquals(cfg2.get("x.host"), "foo.org")
+        Assert.assertEquals(cfg2.get("x.y.port"), "8000")
 
-        val map3 = ConfigReader("x.y.host = 'foo.org' \n\n x.port = '8000'").read().toMap()
-        Assert.assertEquals(map3.size, 2)
-        Assert.assertEquals(map3.get("x.y.host"), "foo.org")
-        Assert.assertEquals(map3.get("x.port"), "8000")
+        val cfg3 = ConfigReader("x.y.host = 'foo.org' \n\n x.port = '8000'").read()
+        Assert.assertEquals(cfg3.size(), 2)
+        Assert.assertEquals(cfg3.get("x.y.host"), "foo.org")
+        Assert.assertEquals(cfg3.get("x.port"), "8000")
     }
 
     @Test
     fun testSimpleConfig_DuplicateItem() {
-        val map1 = ConfigReader("user = 'john.doe' \n user = 'arthur.dent'").read().toMap()
-        Assert.assertEquals(map1.size, 1)
+        val map1 = ConfigReader("user = 'john.doe' \n user = 'arthur.dent'").read()
+        Assert.assertEquals(map1.size(), 1)
         Assert.assertEquals(map1.get("user"), "arthur.dent")
     }
 
     @Test
     fun testEmptySection() {
-        val map1 = ConfigReader("section1 { }").read().toMap()
-        Assert.assertEquals(map1.size, 0)
+        val map1 = ConfigReader("section1 { }").read()
+        Assert.assertEquals(map1.size(), 0)
 
-        val map2 = ConfigReader("section1 { } \n section2 { }").read().toMap()
-        Assert.assertEquals(map2.size, 0)
+        val cfg2 = ConfigReader("section1 { } \n section2 { }").read()
+        Assert.assertEquals(cfg2.size(), 0)
 
-        val map3 = ConfigReader("section1 { } \n section2 { } \n section1 { }").read().toMap()
-        Assert.assertEquals(map3.size, 0)
+        val cfg3 = ConfigReader("section1 { } \n section2 { } \n section1 { }").read()
+        Assert.assertEquals(cfg3.size(), 0)
     }
 
     @Test
@@ -175,11 +171,11 @@ class ConfigReaderTest {
                        |}
                      """.trimMargin()
 
-        val map = ConfigReader(config).read().toMap()
+        val cfg = ConfigReader(config).read()
 
-        Assert.assertEquals(map.size, 2)
-        Assert.assertEquals(map.get("section1.host"), "foo.org")
-        Assert.assertEquals(map.get("section1.port"), "8000")
+        Assert.assertEquals(cfg.size(), 2)
+        Assert.assertEquals(cfg.get("section1.host"), "foo.org")
+        Assert.assertEquals(cfg.get("section1.port"), "8000")
     }
 
     @Test
@@ -194,12 +190,12 @@ class ConfigReaderTest {
                        |}
                      """.trimMargin()
 
-        val map = ConfigReader(config).read().toMap()
-        Assert.assertEquals(map.size, 4)
-        Assert.assertEquals(map.get("user"), "john.doe")
-        Assert.assertEquals(map.get("section1.host"), "foo.org")
-        Assert.assertEquals(map.get("section1.port"), "8000")
-        Assert.assertEquals(map.get("section1.path"), "/foo/org/abc")
+        val cfg = ConfigReader(config).read()
+        Assert.assertEquals(cfg.size(), 4)
+        Assert.assertEquals(cfg.get("user"), "john.doe")
+        Assert.assertEquals(cfg.get("section1.host"), "foo.org")
+        Assert.assertEquals(cfg.get("section1.port"), "8000")
+        Assert.assertEquals(cfg.get("section1.path"), "/foo/org/abc")
     }
 
     @Test
@@ -216,13 +212,13 @@ class ConfigReaderTest {
                        |}
                      """.trimMargin()
 
-        val map = ConfigReader(config).read().toMap()
+        val cfg = ConfigReader(config).read()
 
-        Assert.assertEquals(map.size, 4)
-        Assert.assertEquals(map.get("user"), "john.doe")
-        Assert.assertEquals(map.get("section1.host"), "foo.foo.org")
-        Assert.assertEquals(map.get("section1.port"), "8000")
-        Assert.assertEquals(map.get("section1.path"), "/foo/org/abc")
+        Assert.assertEquals(cfg.size(), 4)
+        Assert.assertEquals(cfg.get("user"), "john.doe")
+        Assert.assertEquals(cfg.get("section1.host"), "foo.foo.org")
+        Assert.assertEquals(cfg.get("section1.port"), "8000")
+        Assert.assertEquals(cfg.get("section1.path"), "/foo/org/abc")
     }
 
     @Test
@@ -239,13 +235,13 @@ class ConfigReaderTest {
                        |}
                      """.trimMargin()
 
-        val map = ConfigReader(config).read().toMap()
+        val cfg = ConfigReader(config).read()
 
-        Assert.assertEquals(map.size, 4)
-        Assert.assertEquals(map.get("section1.user"), "john.doe")
-        Assert.assertEquals(map.get("section1.host"), "foo.foo.org")
-        Assert.assertEquals(map.get("section1.port"), "8000")
-        Assert.assertEquals(map.get("section1.path"), "/foo/org/abc")
+        Assert.assertEquals(cfg.size(), 4)
+        Assert.assertEquals(cfg.get("section1.user"), "john.doe")
+        Assert.assertEquals(cfg.get("section1.host"), "foo.foo.org")
+        Assert.assertEquals(cfg.get("section1.port"), "8000")
+        Assert.assertEquals(cfg.get("section1.path"), "/foo/org/abc")
     }
 
     @Test
@@ -267,10 +263,10 @@ class ConfigReaderTest {
                        |}
                      """.trimMargin()
 
-        val map = ConfigReader(config).read().toMap()
+        val cfg = ConfigReader(config).read()
 
-        Assert.assertEquals(map.size, 1)
-        Assert.assertEquals(map["a.b.c.d.e.f.g.x"], "1")
+        Assert.assertEquals(cfg.size(), 1)
+        Assert.assertEquals(cfg.get("a.b.c.d.e.f.g.x"), "1")
     }
 
     @Test
@@ -285,13 +281,13 @@ class ConfigReaderTest {
                        |}
                      """.trimMargin()
 
-        val map = ConfigReader.create(config.byteInputStream()).read().toMap()
+        val cfg = ConfigReader.create(config.byteInputStream()).read()
 
-        Assert.assertEquals(map.size, 4)
-        Assert.assertEquals(map.get("user"), "john.doe")
-        Assert.assertEquals(map.get("section1.host"), "foo.org")
-        Assert.assertEquals(map.get("section1.port"), "8000")
-        Assert.assertEquals(map.get("section1.path"), "/foo/org/abc")
+        Assert.assertEquals(cfg.size(), 4)
+        Assert.assertEquals(cfg.get("user"), "john.doe")
+        Assert.assertEquals(cfg.get("section1.host"), "foo.org")
+        Assert.assertEquals(cfg.get("section1.port"), "8000")
+        Assert.assertEquals(cfg.get("section1.path"), "/foo/org/abc")
     }
 
     @Test
@@ -308,31 +304,31 @@ class ConfigReaderTest {
                        |}
                      """.trimMargin()
 
-        val map = ConfigReader(config).read().toMap()
-        Assert.assertEquals(map.size, 4)
+        val cfg = ConfigReader(config).read()
+        Assert.assertEquals(cfg.size(), 4)
 
-        val map2 = ConfigReader(config).read().getSubConfig("section1", "section2").toMap()
-        Assert.assertEquals(map2.size, 4)
-        Assert.assertEquals(map2.get("user"), "john.doe")
-        Assert.assertEquals(map2.get("host"), "foo.org")
-        Assert.assertEquals(map2.get("port"), "8000")
-        Assert.assertEquals(map2.get("path"), "/foo/org/abc")
+        val cfg2 = ConfigReader(config).read().getSubConfig("section1", "section2")
+        Assert.assertEquals(cfg2.size(), 4)
+        Assert.assertEquals(cfg2.get("user"), "john.doe")
+        Assert.assertEquals(cfg2.get("host"), "foo.org")
+        Assert.assertEquals(cfg2.get("port"), "8000")
+        Assert.assertEquals(cfg2.get("path"), "/foo/org/abc")
 
-        val map3 = ConfigReader(config).read().getSubConfig("section1").toMap()
-        Assert.assertEquals(map3.size, 1)
-        Assert.assertEquals(map3.get("user"), "john.doe")
+        val cfg3 = ConfigReader(config).read().getSubConfig("section1")
+        Assert.assertEquals(cfg3.size(), 1)
+        Assert.assertEquals(cfg3.get("user"), "john.doe")
 
-        val map4 = ConfigReader(config).read().getSubConfig("section2").toMap()
-        Assert.assertEquals(map4.size, 3)
-        Assert.assertEquals(map4.get("host"), "foo.org")
-        Assert.assertEquals(map4.get("port"), "8000")
-        Assert.assertEquals(map4.get("path"), "/foo/org/abc")
+        val cfg4 = ConfigReader(config).read().getSubConfig("section2")
+        Assert.assertEquals(cfg4.size(), 3)
+        Assert.assertEquals(cfg4.get("host"), "foo.org")
+        Assert.assertEquals(cfg4.get("port"), "8000")
+        Assert.assertEquals(cfg4.get("path"), "/foo/org/abc")
 
-        val map5 = ConfigReader(config).read().getSubConfig("xxxx").toMap()
-        Assert.assertEquals(map5.size, 0)
+        val cfg5 = ConfigReader(config).read().getSubConfig("xxxx")
+        Assert.assertEquals(cfg5.size(), 0)
 
-        val map6 = ConfigReader(config).read().getSubConfig("").toMap()
-        Assert.assertEquals(map6.size, 0)
+        val cfg6 = ConfigReader(config).read().getSubConfig("")
+        Assert.assertEquals(cfg6.size(), 0)
     }
 
     @Test
@@ -347,36 +343,16 @@ class ConfigReaderTest {
                        |}
                      """.trimMargin()
 
-        val map = ConfigReader(config).read().toMap()
-        Assert.assertEquals(map.size, 2)
+        val cfg = ConfigReader(config).read()
+        Assert.assertEquals(cfg.size(), 2)
 
-        val map2 = ConfigReader(config).read().getSubConfig("section1", "section2").toMap()
-        Assert.assertEquals(map2.size, 1)
-        Assert.assertEquals(map2.get("port"), "2000")
+        val cfg2 = ConfigReader(config).read().getSubConfig("section1", "section2")
+        Assert.assertEquals(cfg2.size(), 1)
+        Assert.assertEquals(cfg2.get("port"), "2000")
 
-        val map3 = ConfigReader(config).read().getSubConfig("section2", "section1").toMap()
-        Assert.assertEquals(map3.size, 1)
-        Assert.assertEquals(map3.get("port"), "1000")
-    }
-
-    @Test
-    fun testComplexWithDefinition_Properties() {
-        val config = """def home = "/foo/org"
-                       |
-                       |user = "john.doe"
-                       |section1 {
-                       |   host = "foo.org"
-                       |   port = "8000"
-                       |   path = "${'$'}{home}/abc"
-                       |}
-                     """.trimMargin()
-
-        val props = ConfigReader(config).read().toProperties()
-        Assert.assertEquals(props.size, 4)
-        Assert.assertEquals(props.getProperty("user"), "john.doe")
-        Assert.assertEquals(props.getProperty("section1.host"), "foo.org")
-        Assert.assertEquals(props.getProperty("section1.port"), "8000")
-        Assert.assertEquals(props.getProperty("section1.path"), "/foo/org/abc")
+        val cfg3 = ConfigReader(config).read().getSubConfig("section2", "section1")
+        Assert.assertEquals(cfg3.size(), 1)
+        Assert.assertEquals(cfg3.get("port"), "1000")
     }
 
     @Test
@@ -496,47 +472,47 @@ class ConfigReaderTest {
                        |}
                      """.trimMargin()
 
-        ConfigReader(config).read().toMap()
+        ConfigReader(config).read()
     }
 
     @Test(expectedExceptions = arrayOf(ConfigException::class))
     fun testInvalidConfigItem_MissingEqualsAndValue() {
-        ConfigReader("user ").read().toMap()
+        ConfigReader("user ").read()
     }
 
     @Test(expectedExceptions = arrayOf(ConfigException::class))
     fun testInvalidConfigItem_MissingValue() {
-        ConfigReader("user = ").read().toMap()
+        ConfigReader("user = ").read()
     }
 
     @Test(expectedExceptions = arrayOf(ConfigException::class))
     fun testInvalidConfigItem_MissingEquals() {
-        ConfigReader("user john").read().toMap()
+        ConfigReader("user john").read()
     }
 
     @Test(expectedExceptions = arrayOf(ConfigException::class))
     fun testInvalidString_NotQuoted() {
-        ConfigReader("user = john").read().toMap()
+        ConfigReader("user = john").read()
     }
 
     @Test(expectedExceptions = arrayOf(ConfigException::class))
     fun testInvalidString_InvalidQuoting() {
-        ConfigReader("user = 'john").read().toMap()
+        ConfigReader("user = 'john").read()
     }
 
     @Test(expectedExceptions = arrayOf(ConfigException::class))
     fun testInvalidString_lf() {
-         ConfigReader("user = 'john\n.doe'").read().toMap()
+         ConfigReader("user = 'john\n.doe'").read()
     }
 
     @Test(expectedExceptions = arrayOf(ConfigException::class))
     fun testInvalidString_cr() {
-        ConfigReader("user = 'john\r.doe'").read().toMap()
+        ConfigReader("user = 'john\r.doe'").read()
     }
 
     @Test
     fun testValidString_tab() {
-        ConfigReader("user = 'john\t.doe'").read().toMap()
+        ConfigReader("user = 'john\t.doe'").read()
     }
 
     @Test(expectedExceptions = arrayOf(ConfigException::class))
@@ -546,7 +522,7 @@ class ConfigReaderTest {
                        |
                      """.trimMargin()
 
-        ConfigReader(config).read().toMap()
+        ConfigReader(config).read()
     }
 
     @Test(expectedExceptions = arrayOf(ConfigException::class))
@@ -556,7 +532,7 @@ class ConfigReaderTest {
                        |} xxxx
                      """.trimMargin()
 
-        ConfigReader(config).read().toMap()
+        ConfigReader(config).read()
     }
 
 }

@@ -25,6 +25,8 @@ class ConfigImpl(private val cfgObj: ConfigObject) : Config {
     val trueValues = setOf("true", "yes", "on", "enabled", "active")
     val falseValues = setOf("false", "no", "off", "disabled", "inactive")
 
+    override fun size(): Int = cfgObj.size()
+
     override fun isEmpty(): Boolean = cfgObj.isEmpty()
 
     override fun hasPath(path: String): Boolean = cfgObj.hasPath(path)
