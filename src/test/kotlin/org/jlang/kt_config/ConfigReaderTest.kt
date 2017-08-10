@@ -81,7 +81,6 @@ class ConfigReaderTest {
         Assert.assertEquals(cfg6.get("user"), "j'o'h'n.d'o'e")
     }
 
-
     @Test
     fun testSimpleConfig_1item_SingleQuotedValues() {
         val cfg1 = ConfigReader("user = 'john.doe'").read()
@@ -241,7 +240,37 @@ class ConfigReaderTest {
     }
 
     @Test
-    fun testComplex_Deep() {
+    fun testComplex_Nested() {
+        val config = """a {
+                       |   a1 = "a 1"
+                       |   a2 = "a 2"
+                       |
+                       |   b {
+                       |     b1 = "b 1"
+                       |     b2 = "b 2"
+                       |     c.c1 = "c 1"
+                       |   }
+                       |
+                       |   b.b3 = "b 3"
+                       |}
+                       |
+                       |a.b.b4 = "b 4"
+                     """.trimMargin()
+
+        val cfg = ConfigReader(config).read()
+
+        Assert.assertEquals(cfg.size(), 7)
+        Assert.assertEquals(cfg.get("a.a1"), "a 1")
+        Assert.assertEquals(cfg.get("a.a2"), "a 2")
+        Assert.assertEquals(cfg.get("a.b.b1"), "b 1")
+        Assert.assertEquals(cfg.get("a.b.b2"), "b 2")
+        Assert.assertEquals(cfg.get("a.b.b3"), "b 3")
+        Assert.assertEquals(cfg.get("a.b.b4"), "b 4")
+        Assert.assertEquals(cfg.get("a.b.c.c1"), "c 1")
+    }
+
+    @Test
+    fun testComplex_DeepNested() {
         val config = """a {
                        |  b {
                        |    c {

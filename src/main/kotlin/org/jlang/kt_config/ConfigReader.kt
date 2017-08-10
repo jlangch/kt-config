@@ -108,12 +108,9 @@ class ConfigReader(
         }
 
         private fun slurp(classPathResource: String, loader: ClassLoader): String {
-            val stream: InputStream? = loader.getResourceAsStream(classPathResource)
-            if (stream == null) {
-                throw ConfigException(
-                        "The classpath resource config '$classPathResource' does not exist.")
-           }
-            return slurp(stream)
+            return slurp(loader.getResourceAsStream(classPathResource)
+                            ?: throw ConfigException(
+                                        "The classpath resource config '$classPathResource' does not exist."))
         }
     }
 

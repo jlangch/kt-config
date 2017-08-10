@@ -3,7 +3,7 @@ package org.jlang.kt_config
 import org.testng.annotations.Test
 
 
-class FailuresTest {
+class FailureTest {
 
     @Test(expectedExceptions = arrayOf(ConfigException::class))
     fun testInvalidLineBreakInSingleQuotedString() {

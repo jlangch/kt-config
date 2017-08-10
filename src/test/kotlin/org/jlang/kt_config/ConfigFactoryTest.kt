@@ -21,7 +21,7 @@ import org.testng.annotations.Test
 import java.io.StringReader
 
 
-class ConfigTest {
+class ConfigFactoryTest {
 
     @Test
     fun testCreateFromStream() {
