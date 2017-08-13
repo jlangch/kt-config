@@ -93,10 +93,9 @@ class Lexer(private val reader: StringReader) {
             '\'' -> return '\''
             '"'  -> return '"'
             else -> throw ConfigException(
-                    "Invalid escaped character '\\${lookahead.char}' a "
-                            + "position $pos. Supported escape characters are: "
+                    "Invalid escaped character '\\${lookahead.char}' at "
+                            + "position $pos. Supported escape characters: "
                             + "\\n, \\r, \\t, \\', \\\"")
-
         }
     }
 
@@ -130,34 +129,24 @@ class Lexer(private val reader: StringReader) {
         }
     }
 
-    private fun readIdentifier(): Token {
+    private fun readIdentifier(): Token =
+        Token(IDENTIFIER, readChars({ isIdentifierPartChar(lookahead.char) }), lookahead.pos)
+
+    private fun readAnyTokenToEOL(): Token =
+        Token(ANY, readChars({ isAnyChar(lookahead.char) }), lookahead.pos)
+
+    private fun readChars(cond: () -> Boolean): String {
         val sb = StringBuilder()
-        val startPos = lookahead.pos
 
         sb.append(lookahead.char)
-        consume() // first identifier char
+        consume()
 
-        while (!lookahead.eof() && isIdentifierChar(lookahead.char)) {
+        while (!lookahead.eof() && cond()) {
             sb.append(lookahead.char)
             consume()
         }
 
-        return Token(IDENTIFIER, sb.toString(), startPos)
-    }
-
-    private fun readAnyTokenToEOL(): Token {
-        val sb = StringBuilder()
-        val startPos = lookahead.pos
-
-        sb.append(lookahead.char)
-        consume() // first any char
-
-        while (!lookahead.eof() && isAnyChar(lookahead.char)) {
-            sb.append(lookahead.char)
-            consume()
-        }
-
-        return Token(ANY, sb.toString(), startPos)
+        return sb.toString()
     }
 
     private fun isDotChar(ch: Char?): Boolean = (ch == '.')
@@ -167,10 +156,10 @@ class Lexer(private val reader: StringReader) {
     private fun isWhitespaceChar(ch: Char?): Boolean = WHITESPACES.contains(ch)
 
     private fun isIdentifierStartChar(ch: Char?): Boolean =
-        ch in 'a'..'z' || ch in 'A'..'Z'
+            ch?.isJavaIdentifierStart() ?: false
 
-    private fun isIdentifierChar(ch: Char?): Boolean =
-        isIdentifierStartChar(ch) || ch in '0'..'9' || ch == '_'
+    private fun isIdentifierPartChar(ch: Char?): Boolean =
+            ch?.isJavaIdentifierPart() ?: false
 
     private fun isAnyChar(ch: Char?): Boolean = ch != null && !isWhitespaceChar(ch)
 }

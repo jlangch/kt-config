@@ -34,20 +34,18 @@ class ConfigObject(private val map: Map<String,ConfigValue> = LinkedHashMap()) {
                     { map,value -> map.putAll(value.toMap()); map } )
      }
 
-    fun toProperties(): Properties {
-        return Properties().also { props -> toMap().forEach { k,v -> props.setProperty(k,v) } }
-    }
+    fun toProperties(): Properties =
+        Properties().also { props -> toMap().forEach { k,v -> props.setProperty(k,v) } }
+
 
     fun getSubConfig(sections: List<String>): ConfigObject {
-        if (sections.isEmpty()) return ConfigObject()
-
         return ConfigObject().also { subConfig ->
-            sections.forEach { path ->
-                val subPath = path + '.'
-                cfgMap.values
-                        .filter{ v -> v.path.startsWith(subPath) }
-                        .forEach{ v -> subConfig.put(v.rebase(v.path.substring(subPath.length))) }
-            }
+            sections.map { subPath -> subPath + '.' }
+                    .forEach { subPath ->
+                        cfgMap.values
+                                .filter{ v -> v.path.startsWith(subPath) }
+                                .forEach{ v -> subConfig.put(v.rebase(v.path.removePrefix(subPath))) }
+                    }
         }
     }
 

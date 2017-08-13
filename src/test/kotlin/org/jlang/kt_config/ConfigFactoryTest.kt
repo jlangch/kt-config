@@ -187,6 +187,9 @@ class ConfigFactoryTest {
 
         val cfg6 = ConfigReader(config).read().getSubConfig("")
         Assert.assertEquals(cfg6.size(), 0)
+
+        val cfg7 = ConfigReader(config).read().getSubConfig()
+        Assert.assertEquals(cfg7.size(), 0)
     }
 
     @Test

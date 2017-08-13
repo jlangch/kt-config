@@ -22,9 +22,25 @@ import java.math.BigDecimal
 import java.util.*
 
 
+val BOOL_PAIRS = listOf(
+                    Pair("true", "false"),
+                    Pair("yes", "no"),
+                    Pair("on", "off"),
+                    Pair("enabled", "disabled"),
+                    Pair("active", "inactive"))
+
+
 class ConfigImpl(private val cfgObj: ConfigObject) : Config {
-    val trueValues = setOf("true", "yes", "on", "enabled", "active")
-    val falseValues = setOf("false", "no", "off", "disabled", "inactive")
+
+    val boolValues = HashMap<String,Boolean>()
+
+    init {
+        BOOL_PAIRS.forEach {
+            boolValues.put(it.first, true)
+            boolValues.put(it.second, false)
+        }
+    }
+
 
     override fun size(): Int = cfgObj.size()
 
@@ -84,15 +100,8 @@ class ConfigImpl(private val cfgObj: ConfigObject) : Config {
 
     override fun toString(): String = cfgObj.toString()
 
-    private fun toBoolean(value: String): Boolean {
-        val lowerCaseValue = value.toLowerCase()
-        return when {
-            trueValues.contains(lowerCaseValue) -> true
-            falseValues.contains(lowerCaseValue) -> false
-            else -> throw ConfigException(
-                    "Invalid boolean property $value. Use one of (true|false)," +
-                            "(yes|no), (on|off), (enabled|disabled), (active|inactive)")
-        }
-    }
+    private fun toBoolean(value: String): Boolean =
+        boolValues[value.toLowerCase()]
+                ?: throw ConfigException("Invalid boolean value '$value'. Use one of $BOOL_PAIRS")
 
 }
