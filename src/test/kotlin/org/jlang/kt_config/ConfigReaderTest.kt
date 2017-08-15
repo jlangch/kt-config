@@ -323,7 +323,6 @@ class ConfigReaderTest {
                        |}
                      """.trimMargin()
 
-        println(System.getProperties())
         val cfg = ConfigReader(config, hashMapOf("home" to "/extra/org")).read()
         Assert.assertEquals(cfg.get("user"), "john.doe")
         Assert.assertEquals(cfg.get("section1.host"), "foo.org")

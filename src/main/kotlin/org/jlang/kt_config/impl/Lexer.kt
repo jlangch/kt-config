@@ -48,12 +48,11 @@ class Lexer(private val reader: StringReader) {
     private fun consume(): Character = reader.readNext().also { lookahead = it }
 
     private fun consumeWhitespaces(): Unit {
-        while (isWhitespaceChar(lookahead.char)) consume()
-    }
+        readChars({ isWhitespaceChar(lookahead.char) })
+     }
 
     private fun consumeCommentToEOL(): Unit {
-        consume()
-        while (lookahead.isNotChar('\n', '\r') && !lookahead.eof()) consume()
+        readChars({ !isEOL(lookahead.char) })
     }
 
     private fun readStringToken(quote: Char): Token {
@@ -85,7 +84,7 @@ class Lexer(private val reader: StringReader) {
     private fun readEscapedChar() : Char {
         val pos = lookahead.pos
 
-        consume()
+        consume() // escape char
         when(lookahead.char) {
             'n'  -> return '\n'
             'r'  -> return '\r'
@@ -108,8 +107,7 @@ class Lexer(private val reader: StringReader) {
             sb.append(idToken.data).append('.')
             consume()
             while(isIdentifierStartChar(lookahead.char)) {
-                val idToken: Token = readIdentifier()
-                sb.append(idToken.data)
+                sb.append(readChars({ isIdentifierPartChar(lookahead.char) }))
                 if (isDotChar(lookahead.char)) {
                     sb.append('.')
                     consume()
@@ -137,17 +135,14 @@ class Lexer(private val reader: StringReader) {
 
     private fun readChars(cond: () -> Boolean): String {
         val sb = StringBuilder()
-
-        sb.append(lookahead.char)
-        consume()
-
         while (!lookahead.eof() && cond()) {
             sb.append(lookahead.char)
             consume()
         }
-
         return sb.toString()
     }
+
+    private fun isEOL(ch: Char?): Boolean = (ch == '\n')
 
     private fun isDotChar(ch: Char?): Boolean = (ch == '.')
 
