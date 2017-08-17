@@ -74,18 +74,21 @@ data class Character(val char: Char?, val pos: Position) {
 }
 
 
-class StringReader(private val text: String) {
+class StringReader(private val text: String): Iterator<Character> {
     private val TAB_WIDTH = 4
     private var cursor = 0
     private var textPos = Position()
 
-    fun readNext(): Character = Character(nextChar(), textPos).also { c -> updatePosition(c) }
+    override fun hasNext(): Boolean = true
+
+    override fun next(): Character = Character(nextChar(), textPos).also { c -> updatePosition(c) }
 
     private fun nextChar(): Char? = if (cursor < text.length) text[cursor++] else null
 
     private fun updatePosition(ch: Character): Unit {
         textPos = incPosition(textPos, ch.char)
     }
+
     private fun incPosition(pos: Position, ch: Char?): Position {
         return when (ch) {
                 null -> pos

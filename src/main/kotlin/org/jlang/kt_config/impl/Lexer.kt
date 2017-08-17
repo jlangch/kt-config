@@ -20,11 +20,14 @@ import org.jlang.kt_config.ConfigException
 import org.jlang.kt_config.impl.TokenType.*
 
 
-class Lexer(private val reader: StringReader) {
+class Lexer(private val text: String): Iterator<Token> {
     private val WHITESPACES = setOf(' ', '\n', '\r', '\t')
-    private var lookahead: Character = reader.readNext()
+    private val reader = StringReader(text).iterator()
+    private var lookahead: Character = reader.next()
 
-    fun nextToken(): Token {
+    override fun hasNext(): Boolean = true
+
+    override fun next(): Token {
         while (!lookahead.eof()) {
             when {
                 lookahead.isChar('{') -> return Token(LBRACE, lookahead).also { consume() }
@@ -45,11 +48,11 @@ class Lexer(private val reader: StringReader) {
         return Token.eof(lookahead.pos)
     }
 
-    private fun consume(): Character = reader.readNext().also { lookahead = it }
+    private fun consume(): Character = reader.next().also { lookahead = it }
 
     private fun consumeWhitespaces(): Unit {
         readChars({ isWhitespaceChar(lookahead.char) })
-     }
+    }
 
     private fun consumeCommentToEOL(): Unit {
         readChars({ !isEOL(lookahead.char) })

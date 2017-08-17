@@ -54,13 +54,13 @@ class ConfigReader(
     // Actually a LL(2) parser is sufficient but LL(4) simplifies code
     val LOOKAHEAD_SIZE = 4
 
-    val lexer = Lexer(StringReader(config.trim()))
+    val lexer = Lexer(config)
     val builder = ConfigBuilder()
     val definitions = LinkedHashMap<String,String>()
 
     // prime lookahead buffer with tokens
     var lookahead: MutableList<Token> =
-            ArrayList<Token>().apply { repeat(LOOKAHEAD_SIZE, { add(lexer.nextToken()) }) }
+            ArrayList<Token>().apply { repeat(LOOKAHEAD_SIZE, { add(lexer.next()) }) }
 
     companion object Factory {
 
@@ -145,7 +145,7 @@ class ConfigReader(
     private fun consume(numTokens: Int) {
         fun shift() {
             lookahead.removeAt(0)
-            lookahead.add(lexer.nextToken())
+            lookahead.add(lexer.next())
         }
 
         repeat(numTokens, { shift() })
