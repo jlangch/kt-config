@@ -52,15 +52,14 @@ class ConfigReader(
         private val userDefinitions: Map<String,String> = HashMap()
 ) {
     // Actually a LL(2) parser is sufficient but LL(4) simplifies code
-    val LOOKAHEAD_SIZE = 4
+    private val LOOKAHEAD_SIZE = 4
 
-    val lexer = Lexer(config)
-    val builder = ConfigBuilder()
-    val definitions = LinkedHashMap<String,String>()
+    private val lexer = Lexer(StringReader(config))
+    private val builder = ConfigBuilder()
+    private val definitions = LinkedHashMap<String,String>()
 
-    // prime lookahead buffer with tokens
-    var lookahead: MutableList<Token> =
-            ArrayList<Token>().apply { repeat(LOOKAHEAD_SIZE, { add(lexer.next()) }) }
+    // lookahead buffer with tokens and prime it
+    private var lookahead: Lookahead<Token> = Lookahead(LOOKAHEAD_SIZE, lexer)
 
     companion object Factory {
 
@@ -141,16 +140,6 @@ class ConfigReader(
         }
     }
 
-
-    private fun consume(numTokens: Int) {
-        fun shift() {
-            lookahead.removeAt(0)
-            lookahead.add(lexer.next())
-        }
-
-        repeat(numTokens, { shift() })
-    }
-
     private fun parseDefStatement(): Boolean {
         if (lookahead[0].isType(IDENTIFIER) && "def" == lookahead[0].data) {
             if (lookahead[1].isNotType(IDENTIFIER)) {
@@ -172,7 +161,7 @@ class ConfigReader(
             definitions.put(
                     lookahead[1].data,
                     applyDefinitions(lookahead[3].data, lookahead[3].pos))
-            consume(4)
+            lookahead.consume(4)
 
             return true
         } else {
@@ -190,13 +179,13 @@ class ConfigReader(
                         lookahead[0].data,
                         applyDefinitions(lookahead[2].data, lookahead[2].pos)))
 
-                consume(3)
+                lookahead.consume(3)
             }
             else if (lookahead[2].isType(LBRACK)) {
                 // multi value: name = [ "value1", "value2", ... ]
                 val name = lookahead[0].data
 
-                consume(3)
+                lookahead.consume(3)
 
                 parseConfigItem_MultiValues(name)
 
@@ -205,7 +194,7 @@ class ConfigReader(
                             "Expected array close ']' at position ${lookahead[0].pos}.")
                 }
 
-                consume(1)
+                lookahead.consume(1)
             }
             else {
                 throw ConfigException(
@@ -224,11 +213,11 @@ class ConfigReader(
 
         if (lookahead[0].isType(STRING)) {
             values.add(applyDefinitions(lookahead[0].data, lookahead[0].pos))
-            consume(1)
+            lookahead.consume(1)
 
             while (lookahead[0].isType(COMMA) && lookahead[1].isType(STRING)) {
                 values.add(applyDefinitions(lookahead[1].data, lookahead[1].pos))
-                consume(2)
+                lookahead.consume(2)
             }
         }
 
@@ -238,7 +227,7 @@ class ConfigReader(
     private fun parseSection(): Boolean {
         if (lookahead[0].isType(IDENTIFIER, PATH) && lookahead[1].isType(LBRACE)) {
             builder.pushPath(lookahead[0].data)
-            consume(2)
+            lookahead.consume(2)
 
             // a section is built from any number of config items and sub sections
             while (parseConfigItemOrSection()) {}
@@ -247,7 +236,7 @@ class ConfigReader(
                 throw ConfigException(
                         "Expected section close '}' at position ${lookahead[0].pos}.")
             }
-            consume(1)
+            lookahead.consume(1)
 
             builder.popPath()
 

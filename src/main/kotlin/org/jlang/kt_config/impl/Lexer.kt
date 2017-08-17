@@ -20,82 +20,82 @@ import org.jlang.kt_config.ConfigException
 import org.jlang.kt_config.impl.TokenType.*
 
 
-class Lexer(private val text: String): Iterator<Token> {
+class Lexer(private val reader: StringReader): Iterator<Token> {
     private val WHITESPACES = setOf(' ', '\n', '\r', '\t')
-    private val reader = StringReader(text).iterator()
-    private var lookahead: Character = reader.next()
+
+    // lookahead buffer with one character
+    private var lookahead: Lookahead<Character> = Lookahead(1, reader)
 
     override fun hasNext(): Boolean = true
 
     override fun next(): Token {
-        while (!lookahead.eof()) {
+        while (!lookahead[0].eof()) {
             when {
-                lookahead.isChar('{') -> return Token(LBRACE, lookahead).also { consume() }
-                lookahead.isChar('}') -> return Token(RBRACE, lookahead).also { consume() }
-                lookahead.isChar('[') -> return Token(LBRACK, lookahead).also { consume() }
-                lookahead.isChar(']') -> return Token(RBRACK, lookahead).also { consume() }
-                lookahead.isChar('=') -> return Token(EQUALS, lookahead).also { consume() }
-                lookahead.isChar(',') -> return Token(COMMA, lookahead).also { consume() }
-                lookahead.isChar('"') -> return readStringToken('"')
-                lookahead.isChar('\'') -> return readStringToken('\'')
-                isCommentChar(lookahead.char) -> consumeCommentToEOL()
-                isWhitespaceChar(lookahead.char) -> consumeWhitespaces()
-                isIdentifierStartChar(lookahead.char) -> return readIdentifierOrPathToken()
+                lookahead[0].isChar('{') -> return Token(LBRACE, lookahead[0]).also { lookahead.consume() }
+                lookahead[0].isChar('}') -> return Token(RBRACE, lookahead[0]).also { lookahead.consume() }
+                lookahead[0].isChar('[') -> return Token(LBRACK, lookahead[0]).also { lookahead.consume() }
+                lookahead[0].isChar(']') -> return Token(RBRACK, lookahead[0]).also { lookahead.consume() }
+                lookahead[0].isChar('=') -> return Token(EQUALS, lookahead[0]).also { lookahead.consume() }
+                lookahead[0].isChar(',') -> return Token(COMMA,  lookahead[0]).also { lookahead.consume() }
+                lookahead[0].isChar('"') -> return readStringToken('"')
+                lookahead[0].isChar('\'') -> return readStringToken('\'')
+                isCommentChar(lookahead[0].char) -> consumeCommentToEOL()
+                isWhitespaceChar(lookahead[0].char) -> consumeWhitespaces()
+                isIdentifierStartChar(lookahead[0].char) -> return readIdentifierOrPathToken()
                 else -> return readAnyTokenToEOL() // let the parser decide about the error
             }
         }
 
-        return Token.eof(lookahead.pos)
+        return Token.eof(lookahead[0].pos)
     }
 
-    private fun consume(): Character = reader.next().also { lookahead = it }
 
     private fun consumeWhitespaces(): Unit {
-        readChars({ isWhitespaceChar(lookahead.char) })
+        readChars({ isWhitespaceChar(lookahead[0].char) })
     }
 
     private fun consumeCommentToEOL(): Unit {
-        readChars({ !isEOL(lookahead.char) })
+        readChars({ !isEOL(lookahead[0].char) })
     }
 
     private fun readStringToken(quote: Char): Token {
         val sb = StringBuilder()
-        val startPos = lookahead.pos
+        val startPos = lookahead[0].pos
 
-        consume() // leading quote
+        lookahead.consume() // leading quote
 
-        while (!lookahead.eof() && lookahead.isNotChar(quote)) {
-            if (lookahead.isChar('\n', '\r')) {
+        while (!lookahead[0].eof() && lookahead[0].isNotChar(quote)) {
+            if (lookahead[0].isChar('\n', '\r')) {
                 throw ConfigException(
                         "A string must not be defined across lines. "
-                                + "Position ${lookahead.pos}. Use a \\n instead.")
+                                + "Position ${lookahead[0].pos}. Use a \\n instead.")
             }
-            sb.append(if (lookahead.isEscapeChar()) readEscapedChar() else lookahead.char)
-            consume()
+            sb.append(if (lookahead[0].isEscapeChar()) readEscapedChar() else lookahead[0].char)
+            lookahead.consume()
         }
 
-        if (lookahead.eof()) {
+        if (lookahead[0].eof()) {
             throw ConfigException(
                     "Unexpected EOF within a string at position $startPos")
         }
 
-        consume() // trailing quote
+        lookahead.consume() // trailing quote
 
         return Token(TokenType.STRING, sb.toString(), startPos)
     }
 
     private fun readEscapedChar() : Char {
-        val pos = lookahead.pos
+        val pos = lookahead[0].pos
 
-        consume() // escape char
-        when(lookahead.char) {
+        lookahead.consume() // escape char
+        when(lookahead[0].char) {
             'n'  -> return '\n'
             'r'  -> return '\r'
             't'  -> return '\t'
             '\'' -> return '\''
             '"'  -> return '"'
             else -> throw ConfigException(
-                    "Invalid escaped character '\\${lookahead.char}' at "
+                    "Invalid escaped character '\\${lookahead[0].char}' at "
                             + "position $pos. Supported escape characters: "
                             + "\\n, \\r, \\t, \\', \\\"")
         }
@@ -103,17 +103,17 @@ class Lexer(private val text: String): Iterator<Token> {
 
     private fun readIdentifierOrPathToken(): Token {
         val sb = StringBuilder()
-        val startPos = lookahead.pos
+        val startPos = lookahead[0].pos
         val idToken: Token = readIdentifier()
 
-        if (isDotChar(lookahead.char)) {
+        if (isDotChar(lookahead[0].char)) {
             sb.append(idToken.data).append('.')
-            consume()
-            while(isIdentifierStartChar(lookahead.char)) {
-                sb.append(readChars({ isIdentifierPartChar(lookahead.char) }))
-                if (isDotChar(lookahead.char)) {
+            lookahead.consume()
+            while(isIdentifierStartChar(lookahead[0].char)) {
+                sb.append(readChars({ isIdentifierPartChar(lookahead[0].char) }))
+                if (isDotChar(lookahead[0].char)) {
                     sb.append('.')
-                    consume()
+                    lookahead.consume()
                 }
                 else {
                     break
@@ -131,16 +131,16 @@ class Lexer(private val text: String): Iterator<Token> {
     }
 
     private fun readIdentifier(): Token =
-        Token(IDENTIFIER, readChars({ isIdentifierPartChar(lookahead.char) }), lookahead.pos)
+        Token(IDENTIFIER, readChars({ isIdentifierPartChar(lookahead[0].char) }), lookahead[0].pos)
 
     private fun readAnyTokenToEOL(): Token =
-        Token(ANY, readChars({ isAnyChar(lookahead.char) }), lookahead.pos)
+        Token(ANY, readChars({ isAnyChar(lookahead[0].char) }), lookahead[0].pos)
 
     private fun readChars(cond: () -> Boolean): String {
         val sb = StringBuilder()
-        while (!lookahead.eof() && cond()) {
-            sb.append(lookahead.char)
-            consume()
+        while (!lookahead[0].eof() && cond()) {
+            sb.append(lookahead[0].char)
+            lookahead.consume()
         }
         return sb.toString()
     }

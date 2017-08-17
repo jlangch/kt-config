@@ -100,6 +100,26 @@ class StringReader(private val text: String): Iterator<Character> {
     }
 }
 
+class Lookahead<T>(private val size: Int, private val reader: Iterator<T>) {
+
+    private val buffer = ArrayList<T>()
+
+    // prime the lookahead buffer
+    init { repeat(size, { buffer.add(reader.next()) }) }
+
+    operator fun get(index: Int): T = buffer[index]
+
+    fun consume(): Unit { consume(1) }
+
+    fun consume(numTokens: Int): Unit { repeat(numTokens, { shift() }) }
+
+    private fun shift() {
+        buffer.removeAt(0)
+        buffer.add(reader.next())
+    }
+}
+
+
 fun composePath(base: String, key: String, index: Int): String {
     return composePath(base, composePath(key, index))
 }
