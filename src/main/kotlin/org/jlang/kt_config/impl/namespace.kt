@@ -45,6 +45,8 @@ class Token(val type: TokenType, val data: String, val pos: Position) {
         fun eof(pos: Position): Token = Token(TokenType.EOF, "", pos)
     }
 
+    fun eof() = isType(TokenType.EOF)
+
     fun isType(vararg types: TokenType): Boolean = types.any { it == type }
 
     fun isNotType(vararg types: TokenType): Boolean = types.all { it != type }
@@ -58,9 +60,9 @@ data class Character(val char: Char?, val pos: Position) {
 
     fun isEscapeChar(): Boolean = char == '\\'
 
-    fun isChar(vararg ch: Char): Boolean = ch.any { it == char }
+    fun isChar(vararg chars: Char): Boolean = chars.any { it == char }
 
-    fun isNotChar(vararg ch: Char): Boolean = ch.all { it != char }
+    fun isNotChar(vararg chars: Char): Boolean = chars.all { it != char }
 
     override fun toString(): String {
         return when (char) {

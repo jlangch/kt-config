@@ -128,7 +128,7 @@ class ConfigReader(
             // a config is built from any number of config items and sections
             while (parseConfigItemOrSection()) { }
 
-            if (lookahead[0].isNotType(EOF)) {
+            if (!lookahead[0].eof()) {
                 throw ConfigException("Expected EOF at position ${lookahead[0].pos}.")
             }
 
@@ -161,6 +161,7 @@ class ConfigReader(
             definitions.put(
                     lookahead[1].data,
                     applyDefinitions(lookahead[3].data, lookahead[3].pos))
+
             lookahead.consume(4)
 
             return true

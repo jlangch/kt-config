@@ -102,28 +102,25 @@ class Lexer(private val reader: StringReader): Iterator<Token> {
     }
 
     private fun readIdentifierOrPathToken(): Token {
-        val sb = StringBuilder()
         val startPos = lookahead[0].pos
         val idToken: Token = readIdentifier()
 
         if (isDotChar(lookahead[0].char)) {
-            sb.append(idToken.data).append('.')
-            lookahead.consume()
-            while(isIdentifierStartChar(lookahead[0].char)) {
-                sb.append(readChars({ isIdentifierPartChar(lookahead[0].char) }))
-                if (isDotChar(lookahead[0].char)) {
-                    sb.append('.')
-                    lookahead.consume()
+            val path = StringBuilder().append(idToken.data)
+
+            while (isDotChar(lookahead[0].char)) {
+                path.append('.')
+                lookahead.consume()
+
+                if (!isIdentifierStartChar(lookahead[0].char)) {
+                    throw ConfigException(
+                            "Path unexpectedly ends at position ${lookahead[0].pos}.")
                 }
-                else {
-                    break
-                }
+
+                path.append(readIdentifier().data)
             }
-            if (sb.endsWith('.')) {
-                throw ConfigException(
-                        "Invalid path at position $startPos. Paths must not end with a '.'")
-            }
-            return Token(PATH, sb.toString(), startPos)
+
+            return Token(PATH, path.toString(), startPos)
         }
         else {
             return idToken
