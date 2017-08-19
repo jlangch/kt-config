@@ -263,7 +263,7 @@ class ConfigReader(
     }
 
     private fun hasDefinitions(text: String): Boolean {
-        return text.matches(Regex(".*[$][{][^}]+[}].*"))
+        return text.matches(".*[$][{][^}]+[}].*".toRegex())
     }
 
     private fun validateUserDefinitions(definitions: Map<String,String>): Unit {
