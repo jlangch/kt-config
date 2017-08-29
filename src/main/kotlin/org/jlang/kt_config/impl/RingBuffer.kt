@@ -24,16 +24,18 @@ class RingBuffer<T>(private val capacity: Int) {
 
     fun full(): Boolean = available == capacity
 
-    operator fun get(offset: Int): T = buffer[readSlot(offset)]!!
+    operator fun get(offset: Int): T = peek(offset)
+
+    fun peek(offset: Int = 0): T = buffer[readSlot(offset)]!!
 
     fun take(): T  = buffer[readSlot(0)]!!.also { available-- }
 
-    fun put(element: T): Unit {
+    fun add(element: T): Unit {
         if (full()) throw RuntimeException("The ring buffer is full")
 
         buffer[writePos] = element
         available++
-        writePos = rollBufferPos(writePos + 1)
+        writePos = rollPosition(writePos + 1)
     }
 
     private fun readSlot(offset: Int): Int {
@@ -44,10 +46,10 @@ class RingBuffer<T>(private val capacity: Int) {
             throw RuntimeException("Ring buffer offset $offset out of bounds")
         }
 
-        return rollBufferPos(rollBufferPos(writePos - available) + offset)
+        return rollPosition(rollPosition(writePos - available) + offset)
     }
 
-    private fun rollBufferPos(pos: Int): Int {
+    private fun rollPosition(pos: Int): Int {
         return when {
             pos >= capacity -> pos - capacity
             pos < 0 -> pos + capacity
